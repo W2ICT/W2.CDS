@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WING 2 Combat Direction System</title>
+<link rel="stylesheet" href="lib/leaflet.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="locked">
+
+<!-- ================= หน้าเข้าระบบ ================= -->
+<div id="gate" hidden>
+  <form id="gate-form" class="gate-card" autocomplete="off">
+    <div class="gate-brand"><span class="dot"></span> WING&nbsp;2 Combat Direction System</div>
+    <div class="gate-sub">ระบบอำนวยการยุทธ์ป้องกันฐานบิน กองบิน ๒ — สำหรับผู้ได้รับอนุญาตเท่านั้น</div>
+    <label for="gate-pw">รหัสผ่าน</label>
+    <input type="password" id="gate-pw" autocomplete="current-password" spellcheck="false" placeholder="••••••••">
+    <div id="gate-err" class="gate-err" hidden>รหัสผ่านไม่ถูกต้อง</div>
+    <button type="submit" class="gate-btn">เข้าระบบ</button>
+    <div class="gate-note">ข้อมูลในระบบเป็นชั้นความลับ — ห้ามเผยแพร่</div>
+  </form>
+</div>
+
+<div id="app">
+
+  <!-- ================= แถบบน ================= -->
+  <header id="topbar">
+    <div class="brand"><span class="dot"></span> WING&nbsp;2 Combat&nbsp;Direction&nbsp;System</div>
+    <div class="sep"></div>
+    <button class="tbtn" id="t-save" title="บันทึกสถานการณ์ (S)">💾 บันทึก</button>
+    <button class="tbtn" id="t-open" title="เปิดสถานการณ์ (O)">📂 เปิด</button>
+    <button class="tbtn" id="t-png" title="ส่งออกภาพ PNG">🖼 ส่งออก</button>
+    <div class="sep"></div>
+    <button class="tbtn" id="t-replay" title="เล่นย้อนเหตุการณ์ (R)">⏱ เล่นย้อน</button>
+    <div class="sep"></div>
+    <button class="tbtn ghost" id="t-present" title="โหมดนำเสนอ (P)">⛶ นำเสนอ</button>
+    <button class="tbtn ghost" id="t-help" title="ช่วยเหลือ / คีย์ลัด (?)">?</button>
+    <div class="spacer"></div>
+    <button class="tbtn ghost" id="t-operator" title="ตั้งชื่อผู้ปฏิบัติงาน">ผู้ปฏิบัติงาน</button>
+    <div class="clock" id="clock"></div>
+  </header>
+
+  <!-- ================= แผงซ้าย ================= -->
+  <aside id="left" class="panel">
+    <div class="p-scroll">
+      <section class="sect" id="sect-palette">
+        <h3><span>บัญชีสัญลักษณ์</span><span class="chev">▾</span></h3>
+        <div class="sect-body">
+          <input class="pal-search" id="pal-search" placeholder="ค้นหาสัญลักษณ์…">
+          <div id="palette"></div>
+        </div>
+      </section>
+
+      <section class="sect" id="sect-tools">
+        <h3><span>เครื่องมือวาดกราฟิกยุทธการ</span><span class="chev">▾</span></h3>
+        <div class="sect-body">
+          <div class="toolgrid" id="tools"></div>
+          <div class="field" style="margin-top:10px">
+            <label>ฝ่าย/สีของกราฟิกที่วาด</label>
+            <div class="aff-pick" id="draw-aff">
+              <button class="on" data-a="friend">ฝ่ายเรา</button>
+              <button data-a="hostile">ข้าศึก</button>
+              <button data-a="neutral">เป็นกลาง</button>
+              <button data-a="unknown">ไม่ทราบ</button>
+            </div>
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;color:var(--text-1);margin-top:6px">
+            <input type="checkbox" id="keep-armed"> วางสัญลักษณ์ต่อเนื่อง (ไม่ต้องเลือกซ้ำ)
+          </label>
+        </div>
+      </section>
+    </div>
+  </aside>
+
+  <!-- ================= แผนที่ ================= -->
+  <main id="map">
+    <button class="map-tab" id="toggle-left" title="ย่อ/ขยายแผงซ้าย">‹</button>
+    <button class="map-tab" id="toggle-right" title="ย่อ/ขยายแผงขวา">›</button>
+    <div class="map-readout" id="readout"></div>
+    <div class="map-status" id="status-chips"></div>
+    <div id="layer-filter">
+      <button id="lf-toggle" title="กรองเลเยอร์ — เปิด/ปิดกลุ่มไอคอนที่ต้องการดู">⧉ เลเยอร์</button>
+      <div id="lf-menu" hidden></div>
+    </div>
+    <div id="type-filter"></div>
+    <div class="hint-bar" id="hintbar"></div>
+    <div id="replaybar">
+      <span class="rt" id="replay-time">0/0</span>
+      <input type="range" id="replay-range" min="0" max="0" value="0" step="1">
+      <button class="tbtn" id="replay-exit">ออกจากโหมดเล่นย้อน</button>
+    </div>
+  </main>
+
+  <!-- ================= แผงขวา ================= -->
+  <aside id="right" class="panel">
+    <div class="p-scroll">
+      <section class="sect" id="sect-props">
+        <h3><span>คุณสมบัติ</span><span class="chev">▾</span></h3>
+        <div class="sect-body"><div id="props"></div></div>
+      </section>
+
+      <section class="sect" id="sect-layers">
+        <h3><span>เลเยอร์ / การมองเห็น</span><span class="chev">▾</span></h3>
+        <div class="sect-body"><div id="layers"></div></div>
+      </section>
+
+      <section class="sect" id="sect-inc">
+        <h3><span>บันทึกเหตุการณ์</span><span class="chev">▾</span></h3>
+        <div class="sect-body">
+          <div class="field">
+            <div style="display:flex;gap:6px">
+              <select id="inc-pri" style="width:auto;padding:6px">
+                <option value="1">P1 เร่งด่วน</option>
+                <option value="2" selected>P2 สำคัญ</option>
+                <option value="3">P3 ทั่วไป</option>
+              </select>
+              <button class="btn" id="inc-pin" title="ผูกพิกัดกับเหตุการณ์" style="width:auto;padding:6px 10px">📍</button>
+            </div>
+          </div>
+          <div class="field">
+            <input id="inc-text" placeholder="ข้อความเหตุการณ์… (Enter เพื่อเพิ่ม)">
+          </div>
+          <button class="btn primary" id="inc-add">+ เพิ่มเหตุการณ์</button>
+          <div id="inclist" style="margin-top:10px"></div>
+        </div>
+      </section>
+
+      <section class="sect" id="sect-sitrep">
+        <h3><span>สรุปสถานการณ์ / คำสั่งการ (SITREP)</span><span class="chev">▾</span></h3>
+        <div class="sect-body">
+          <textarea id="sitrep" style="width:100%;min-height:120px" placeholder="สรุปสถานการณ์ปัจจุบัน, เจตนารมณ์ผู้บังคับบัญชา, ภารกิจเร่งด่วน…"></textarea>
+        </div>
+      </section>
+
+      <section class="sect collapsed" id="sect-log">
+        <h3><span>ปูมการเปลี่ยนแปลง</span><span class="chev">▾</span></h3>
+        <div class="sect-body">
+          <div class="btn-row" style="margin-bottom:8px">
+            <button class="btn" id="log-csv">ส่งออก CSV</button>
+            <button class="btn danger" id="log-clear">ล้างปูม</button>
+          </div>
+          <div id="logview"></div>
+        </div>
+      </section>
+    </div>
+  </aside>
+</div>
+
+<!-- ================= modal ช่วยเหลือ ================= -->
+<div class="modal-wrap" id="modal-help">
+  <div class="modal">
+    <h2>วิธีใช้ & คีย์ลัด</h2>
+    <div class="m-body">
+      <p style="margin-top:0;color:var(--text-1)">
+        <b>วางสัญลักษณ์:</b> ลากไอคอนจากจานซ้ายมาปล่อยบนแผนที่ (หรือคลิกเลือกไอคอน แล้วคลิกบนแผนที่) • ลากไอคอนบนแผนที่เพื่อย้าย • คลิกเพื่อเลือก/แก้ไขในแผงขวา • ดับเบิลคลิกเพื่อแก้ชื่อ • <b>ชี้เมาส์ที่ไอคอน</b> เพื่อดูรายละเอียด (ชนิด/ช่องกริด/ฝ่าย/สถานะ)<br>
+        <b>วงขอบสีไอคอน = ฝ่าย:</b> ฟ้า = ฝ่ายเรา, แดง = ข้าศึก, เขียว = เป็นกลาง, เหลือง = ไม่ทราบฝ่าย<br>
+        <b>แท็กกรอง (ซ้ายบนแผนที่):</b> คลิกแท็กชื่อชนิดหน่วยเพื่อซ่อน/แสดงไอคอนชนิดนั้นทั้งหมด<br>
+        <b>วาดกราฟิก:</b> เลือกเครื่องมือ → คลิกวางจุด → ดับเบิลคลิก/Enter จบ • Esc ยกเลิก<br>
+        <b>ช่องกริด</b> อ่านที่มุมล่างซ้าย รูปแบบ <code>คอลัมน์-แถว·ช่องย่อย</code> เช่น <code>12-P·47</code> • พิกัดแบบ DDM
+      </p>
+      <table class="help-table">
+        <tr><td><kbd>S</kbd> / <kbd>O</kbd></td><td>บันทึก / เปิดสถานการณ์</td></tr>
+        <tr><td><kbd>P</kbd></td><td>โหมดนำเสนอ (ซ่อนแผงข้าง สำหรับจอผนัง)</td></tr>
+        <tr><td><kbd>[</kbd> / <kbd>]</kbd></td><td>ย่อ/ขยายแผงซ้าย / แผงขวา</td></tr>
+        <tr><td><kbd>G</kbd></td><td>เปิด-ปิดเส้นกริด</td></tr>
+        <tr><td><kbd>R</kbd></td><td>เข้า/ออก โหมดเล่นย้อนเหตุการณ์</td></tr>
+        <tr><td><kbd>◀</kbd> <kbd>▶</kbd></td><td>หมุนทิศสัญลักษณ์ที่เลือก (±5°)</td></tr>
+        <tr><td><kbd>Del</kbd></td><td>ลบสัญลักษณ์/กราฟิกที่เลือก</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>ยกเลิกการเลือก / การวาด</td></tr>
+      </table>
+      <p style="color:var(--text-2);font-size:11.5px;margin-bottom:0">
+        ข้อมูลทั้งหมดเก็บในเครื่องนี้เท่านั้น (auto-save ลงเบราว์เซอร์) — ไม่มีการส่งออกอินเทอร์เน็ต
+        ยกเว้นเลือกใช้ “แผนที่ฐานออนไลน์”. ไฟล์สถานการณ์และกริดเป็นข้อมูลชั้นความลับ ให้จัดเก็บตามระเบียบ.
+      </p>
+    </div>
+    <div class="m-foot"><button class="btn primary" id="help-close" style="width:auto;padding:7px 18px">เข้าใจแล้ว</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ไฟล์อินพุตซ่อน -->
+<input type="file" id="imp-json" accept=".json,application/json" hidden>
+<input type="file" id="imp-kml" accept=".kml,.xml" hidden>
+<input type="file" id="imp-img" accept="image/*" hidden>
+
+<!-- ================= สคริปต์ ================= -->
+<script src="lib/leaflet.js"></script>
+<script src="lib/mgrs.js"></script>
+<script src="js/grid-data.js"></script>
+<script src="js/wing2-areas.js"></script>
+<script src="js/catalog.js"></script>
+<script src="js/symbols.js"></script>
+<script src="js/core.js"></script>
+<script src="js/areas.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/export.js"></script>
+<script src="js/io.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
