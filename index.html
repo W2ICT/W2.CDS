@@ -934,6 +934,12 @@ body.dnd-grabbing, body.dnd-grabbing * { cursor: grabbing !important; }
 }
 .layer-row:last-child { border-bottom: 0; }
 .layer-row .name { flex: 1; }
+.layer-subhead {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  margin: 2px 0 4px; color: var(--text-2); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.layer-subhead .btn { width: auto; padding: 3px 10px; font-size: 11px; text-transform: none; letter-spacing: 0; }
 .layer-row .count { color: var(--text-2); font-family: var(--mono); font-size: 11px; }
 .switch { position: relative; width: 34px; height: 18px; flex: none; }
 .switch input { opacity: 0; width: 0; height: 0; }
@@ -1137,6 +1143,27 @@ kbd {
 }
 :root[data-theme="light"] .graphic-label { text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
 
+/* ป้ายกลางเส้นเชื่อมความสัมพันธ์ (links.js) — ระยะทาง + แบริ่ง
+   position:absolute + left/top 0 บน marker container ขนาด 0×0 → มุมซ้ายบนตรงจุดกลางเส้น
+   แล้ว translate(-50%,-50%) ดึงให้ "จุดกึ่งกลางชิป" ทับจุดกลางเส้นพอดีทั้งแกนตั้ง/นอน */
+.link-lbl {
+  position: absolute; left: 0; top: 0;
+  display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 700;
+  white-space: nowrap; line-height: 1.25; padding: 1px 5px; border-radius: 3px;
+  color: #fecaca; background: #0b0f14; border: 1px solid rgba(239, 68, 68, .6);
+  text-shadow: 0 0 2px #000, 0 0 3px #000; pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.link-lbl.blue { color: #bfdbfe; border-color: rgba(59, 130, 246, .6); }
+.link-lbl.yellow { color: #fde68a; border-color: rgba(234, 179, 8, .55); }
+.link-lbl.orange { color: #fdba74; border-color: rgba(249, 115, 22, .55); }
+.link-lbl.bright {
+  color: #e0f2fe; border-color: #38bdf8;
+  box-shadow: 0 0 7px rgba(56, 189, 248, .75), inset 0 0 6px rgba(56, 189, 248, .3);
+}
+/* เส้นเชื่อมความสำคัญเร่งด่วนสูงสุด (หน่วยถูกทำลาย) — เรืองแสง */
+.link-urgent { filter: drop-shadow(0 0 3px rgba(56, 189, 248, .95)); }
+
 /* ป้ายชื่อเลเยอร์ขอบเขตพื้นที่ */
 .area-lbl {
   display: inline-block; font-size: 10px; font-weight: 700; white-space: nowrap;
@@ -1205,7 +1232,7 @@ body.locked #app { display: none; }
 }
 
 </style>
-<!-- build: single-file bundle (build/bundle.mjs) — 2026-09-10T10:10:48.915Z -->
+<!-- build: single-file bundle (build/bundle.mjs) — 2026-09-10T14:59:00.271Z -->
 </head>
 <body class="locked">
 
@@ -4869,7 +4896,7 @@ window.WR_GRAPHICS = [
     m.on('click', L.DomEvent.stop).on('click', () => select(ent.id));
     m.on('dblclick', L.DomEvent.stop).on('dblclick', () => { select(ent.id); rename(ent.id); });
     m.on('dragstart', () => { WR.core.clearHighlight(); });
-    m.on('drag', e => { const p = e.target.getLatLng(); ent.lat = p.lat; ent.lng = p.lng; WR.ui && WR.ui.refreshProps(); });
+    m.on('drag', e => { const p = e.target.getLatLng(); ent.lat = p.lat; ent.lng = p.lng; WR.ui && WR.ui.refreshProps(); WR.links && WR.links.recompute(); });
     m.on('dragend', () => { touch('move', ent); });
     m.bindTooltip(() => tipHtml(ent), { direction: 'right', offset: [12, 0], opacity: 1, sticky: true, className: 'ent-tip' });
     m.addTo(groups[ent.cat]);
@@ -5017,6 +5044,252 @@ window.WR_GRAPHICS = [
     setTypeVisible, isTypeHidden, showAllTypes, typesInUse,
     serialize, load, clearAll, get, selected, all, on,
     catDef: id => CAT_BY_ID[id],
+  };
+})();
+
+</script>
+<script>
+/* =========================================================================
+   links.js — เส้นเชื่อมความสัมพันธ์ระหว่างไอคอน (คำนวณสด)
+   กติกา (2026-09-10):
+     กลุ่มหน่วยตอบโต้ = สามยอด · แมวป่า · สายลม · เสือดาว · K-9 · พิราบ
+
+     ① (ก) "ผู้ต้องสงสัย/ข้าศึก" (steal) แต่ละตัว  →  หน่วยตอบโต้ที่ใกล้ที่สุด ๓ หน่วย
+            เส้นประ "แดง" · แบริ่ง วัดจากหน่วยตอบโต้ → ไปยัง ผู้ต้องสงสัย · ข้ามหน่วยที่ "ถูกทำลาย"
+        (ข) เพดานกันเส้นรก: หน่วยตอบโต้ ๑ ตัว เชื่อม steal ได้ไม่เกิน ๒ ตัว (เลือก ๒ ตัวที่ใกล้สุด)
+            ถ้าโดนตัดจากเพดาน → เส้นนั้นหายไป (ไม่ backfill) — steal ตัวนั้นอาจได้ < ๓ เส้น
+        (ค) ลำดับ (ก) สำคัญกว่า (ข): ทำ (ก) ให้ครบก่อน แล้ว (ข) จึงตัดส่วนเกิน
+        (ง) ถ้า steal เปลี่ยนเป็น "ถูกทำลาย" → ตัดเส้นแดงทั้งหมดของมัน เหลือแค่กฎ ③④ (สามยอด+โอสถ)
+
+     ② "โอสถ" (osot)  →  หน่วยตอบโต้ที่สถานะ เสียหาย/ถูกทำลาย  ใกล้สุด ๒ หน่วย
+        แบริ่ง วัดจาก โอสถ → ไปยัง หน่วยตอบโต้
+          - หน่วย "ถูกทำลาย" = เร่งด่วนสูงสุด → เส้นประ "ฟ้าสว่างเรืองแสง" (จัดลำดับก่อน)
+          - หน่วย "เสียหาย"  = รองลงมา        → เส้นประ "ฟ้าปกติ"
+
+     ③ "ผู้ต้องสงสัย/ข้าศึก" (steal) ที่สถานะ "ถูกทำลาย"  →  "โอสถ" (osot) ที่ใกล้สุด "๑ ไอคอน" (max 1)
+        เส้น "ทึบ (ไม่ประ) สีเหลือง"  · แบริ่ง วัดจาก โอสถ → ไปยัง ผู้ต้องสงสัย
+        ความสำคัญ/เร่งด่วน "ต่ำสุด" — เส้นบาง จาง วาดใต้เส้นอื่น
+
+     ④ "ผู้ต้องสงสัย/ข้าศึก" (steal) ที่สถานะ "ถูกทำลาย"  →  "สามยอด" (sam-yot) ที่ใกล้สุด ๑ ไอคอน (max 1)
+        เส้น "ทึบ (ไม่ประ) สีส้ม"  · แบริ่ง วัดจาก สามยอด → ไปยัง ผู้ต้องสงสัย
+        ความสำคัญ/เร่งด่วน "ต่ำสุด" — เส้นบาง จาง วาดใต้เส้นอื่น
+
+   • ป้ายกลางเส้น: ระยะทาง (กม.) + แบริ่ง° + ทิศ 16 จุด  เอียงตามแนวเส้น
+     (ไม่กลับหัว) และเลื่อนออกข้างเส้นไม่ให้เส้นทับตัวอักษร
+   • คำนวณใหม่ทุกครั้งที่ไอคอนถูกเพิ่ม/ลบ/ย้าย/แก้ไข(รวมเปลี่ยนสถานะ) · เปิด/ปิดได้
+   • ไม่บันทึกลงไฟล์สถานการณ์ (เป็นผลลัพธ์ที่คำนวณสด)
+   ========================================================================= */
+(function () {
+  const WR = (window.WR = window.WR || {});
+
+  const RESPONDER_IDS = ['sam-yot', 'maeoprai', 'sailom', 'sueadao', 'k9', 'pirab'];
+  const LS_ON = 'wr_links_on', LS_OP = 'wr_links_op';
+
+  // แต่ละกฎ: anchor = ไอคอนหลัก (anchorId เดี่ยว หรือ anchorIds อาร์เรย์), members = ไอคอนที่จับคู่
+  //   max         : จำนวน member ที่ใกล้สุดที่จะเชื่อม "ต่อ anchor 1 ตัว"
+  //   bearingFrom : 'member' = แบริ่งจาก member ไป anchor | 'anchor' = จาก anchor ไป member
+  //   anchorFilter: เงื่อนไขที่ anchor ต้องผ่านจึงจะสร้างเส้น (เช่น ยังไม่ถูกทำลาย)
+  //   filter      : เงื่อนไขคัดเฉพาะ member ที่จะนำมาจับคู่
+  //   rank(m)     : ลำดับความสำคัญ (เลขน้อย = ก่อน) จัดก่อนแล้วค่อยเรียงตามระยะ
+  //   styleFor(m) : คืน { color, cls, urgent, solid, minor } ต่อเส้น (แทน color/cls ระดับกฎ)
+  //   solid       : เส้นทึบ (ไม่ประ) | minor : ความสำคัญต่ำ — เส้นบางลง จางลง
+  //   memberCap N : หลังเลือกครบทุก anchor แล้ว — member 1 ตัวคงเส้นได้ไม่เกิน N (เลือก N ที่ใกล้สุด)
+  //                 ส่วนที่เกินถูกตัดทิ้ง ไม่ backfill
+  const BLUE = '#3b82f6', BLUE_HOT = '#38bdf8', YELLOW = '#eab308', ORANGE = '#f97316';
+  const RULES = [
+    // ③④ วาดก่อน (อยู่ใต้เส้นอื่น) — ความสำคัญต่ำสุด
+    {
+      anchorId: 'steal', memberIds: ['osot'], max: 1, bearingFrom: 'member',
+      color: YELLOW, cls: ' yellow', solid: true, minor: true,
+      anchorFilter: e => e.status === 'dead',   // เฉพาะผู้ต้องสงสัยที่ "ถูกทำลาย"
+      filter: null,
+    },
+    {
+      anchorId: 'steal', memberIds: ['sam-yot'], max: 1, bearingFrom: 'member',
+      color: ORANGE, cls: ' orange', solid: true, minor: true,
+      anchorFilter: e => e.status === 'dead',
+      filter: null,
+    },
+    {
+      // (ก) steal เป็น anchor → เลือกหน่วยตอบโต้ใกล้สุด 3 · (ข) เพดานต่อหน่วย = 2 steal
+      anchorId: 'steal', memberIds: RESPONDER_IDS, max: 3, bearingFrom: 'member',
+      color: '#ef4444', cls: '', memberCap: 2,
+      anchorFilter: e => e.status !== 'dead',   // steal "ถูกทำลาย" → ตัดเส้นแดงทั้งหมดของมัน
+      filter: e => e.status !== 'dead',         // หน่วยตอบโต้ "ถูกทำลาย" → ข้าม
+    },
+    {
+      anchorId: 'osot', memberIds: RESPONDER_IDS, max: 2, bearingFrom: 'anchor',
+      anchorFilter: null,
+      filter: e => e.status === 'dmg' || e.status === 'dead',
+      rank: m => (m.status === 'dead' ? 0 : 1),   // ถูกทำลาย = เร่งด่วนสูงสุด มาก่อน
+      styleFor: m => m.status === 'dead'
+        ? { color: BLUE_HOT, cls: ' bright', urgent: true }
+        : { color: BLUE, cls: ' blue' },
+    },
+  ];
+
+  let map, lineGroup, labelGroup, visible = true, ready = false, linkCount = 0;
+  let opacity = 1;                       // 0..1 = ตัวคูณความทึบเส้น/ป้าย (ผู้ใช้ปรับได้)
+  const labelOp = () => Math.max(0.3, opacity);
+
+  function init() {
+    map = WR.core.map;
+    // 2 pane แยกกัน: เส้นอยู่ล่าง (470) ป้ายอยู่บน (471) → ป้ายทับเส้นเสมอ ไม่ว่าลำดับ DOM
+    if (!map.getPane('links')) {
+      map.createPane('links');
+      map.getPane('links').style.zIndex = 470;   // ใต้ไอคอนหน่วย (500) เหนือกราฟิกยุทธการ (400)
+      map.getPane('links').style.pointerEvents = 'none';
+    }
+    if (!map.getPane('linkLabels')) {
+      map.createPane('linkLabels');
+      map.getPane('linkLabels').style.zIndex = 471;
+      map.getPane('linkLabels').style.pointerEvents = 'none';
+    }
+    lineGroup = L.layerGroup([], { pane: 'links' });
+    labelGroup = L.layerGroup([], { pane: 'linkLabels' });
+    try {
+      const s = localStorage.getItem(LS_ON); if (s != null) visible = s === '1';
+      const o = parseFloat(localStorage.getItem(LS_OP)); if (!isNaN(o)) opacity = o;
+    } catch (e) {}
+    if (visible) { lineGroup.addTo(map); labelGroup.addTo(map); }
+    map.on('zoomend', recompute);   // มุมเอียงป้ายคำนวณจากพิกัดจอ — ปรับใหม่เมื่อซูม
+    ready = true;
+    recompute();
+  }
+
+  // แบริ่งเริ่มต้น (0–360°, 0 = ทิศเหนือ) จากจุด a ไปยังจุด b
+  function bearing(a, b) {
+    const r = Math.PI / 180;
+    const y = Math.sin((b.lng - a.lng) * r) * Math.cos(b.lat * r);
+    const x = Math.cos(a.lat * r) * Math.sin(b.lat * r)
+            - Math.sin(a.lat * r) * Math.cos(b.lat * r) * Math.cos((b.lng - a.lng) * r);
+    return (Math.atan2(y, x) / r + 360) % 360;
+  }
+  const COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+                   'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+  const compass = d => COMPASS[Math.round(d / 22.5) % 16];
+
+  function drawLink(rule, st, ancLL, memLL, d) {
+    const base = st.urgent ? 1 : st.minor ? 0.75 : 0.9;
+    const pl = L.polyline([ancLL, memLL], {
+      pane: 'links', color: st.color, lineCap: 'round', interactive: false,
+      weight: st.urgent ? 3 : st.minor ? 1.5 : 2,
+      opacity: base * opacity,
+      dashArray: st.solid ? null : st.urgent ? '7 5' : '6 6',
+      className: st.urgent ? 'link-urgent' : '',
+    });
+    pl._baseOp = base;
+    pl.addTo(lineGroup);
+
+    const km = d / 1000;
+    const brg = rule.bearingFrom === 'anchor' ? bearing(ancLL, memLL) : bearing(memLL, ancLL);
+
+    // เอียงป้ายให้ขนานกับเส้น (มุมบนจอ) — บีบช่วง −90°..90° กันตัวอักษรกลับหัว
+    const pa = map.latLngToLayerPoint(ancLL), pb = map.latLngToLayerPoint(memLL);
+    let ang = Math.atan2(pb.y - pa.y, pb.x - pa.x) * 180 / Math.PI;
+    if (ang > 90) ang -= 180; else if (ang < -90) ang += 180;
+    const tf = `translate(-50%,-50%) rotate(${ang.toFixed(1)}deg)`;
+
+    // จุดวางป้าย = กึ่งกลาง "บนจอ" ของเส้นที่วาดจริง แล้วแปลงกลับเป็นพิกัด
+    // + iconAnchor [0,0] ให้ศูนย์กลางชิป (จาก translate(-50%,-50%)) ตรงจุดนี้พอดี
+    // ⇒ ป้ายอยู่กลางเส้นเป๊ะทั้งแกนตั้งและแกนนอน
+    const mid = map.layerPointToLatLng(L.point((pa.x + pb.x) / 2, (pa.y + pb.y) / 2));
+
+    L.marker(mid, {
+      pane: 'linkLabels', interactive: false,
+      icon: L.divIcon({
+        className: '', iconSize: [0, 0], iconAnchor: [0, 0],
+        html: `<div class="link-lbl${st.cls}" style="transform:${tf};opacity:${labelOp().toFixed(2)}">`
+            + `${km.toFixed(2)} กม. • ${Math.round(brg)}° ${compass(brg)}</div>`,
+      }),
+    }).addTo(labelGroup);
+    linkCount++;
+  }
+
+  function recompute() {
+    if (!ready || !lineGroup) return;
+    lineGroup.clearLayers();
+    labelGroup.clearLayers();
+    linkCount = 0;
+    if (!visible) return;
+
+    // นับเฉพาะไอคอนที่ "มองเห็นอยู่" (ไม่ถูกซ่อนด้วยตัวกรองชนิด/กลุ่ม)
+    const shown = e => {
+      if (WR.entities.isTypeHidden && WR.entities.isTypeHidden(e.defId)) return false;
+      const dd = WR.entities.catDef && WR.entities.catDef(e.defId);
+      if (dd && WR.entities.isCatVisible && !WR.entities.isCatVisible(dd.cat)) return false;
+      return true;
+    };
+    const ents = WR.entities.all().filter(shown);
+
+    RULES.forEach(rule => {
+      const anchorIds = rule.anchorIds || [rule.anchorId];
+      const anchors = ents.filter(e => anchorIds.indexOf(e.defId) !== -1
+        && (!rule.anchorFilter || rule.anchorFilter(e)));
+      let members = ents.filter(e => rule.memberIds.indexOf(e.defId) !== -1);
+      if (rule.filter) members = members.filter(rule.filter);
+      if (!anchors.length || !members.length) return;
+
+      const styleFor = rule.styleFor
+        || (() => ({ color: rule.color, cls: rule.cls, solid: rule.solid, minor: rule.minor }));
+
+      // รอบ 1 — แต่ละ anchor เลือก member ใกล้สุด rule.max ตัว → รวมเป็นรายการคู่
+      let pairs = [];
+      anchors.forEach(anc => {
+        const ancLL = L.latLng(anc.lat, anc.lng);
+        members
+          .map(m => ({ anc, ancLL, m, mll: L.latLng(m.lat, m.lng), d: map.distance(L.latLng(m.lat, m.lng), ancLL) }))
+          .sort((a, b) => {
+            if (rule.rank) { const r = rule.rank(a.m) - rule.rank(b.m); if (r) return r; }
+            return a.d - b.d;
+          })
+          .slice(0, rule.max)
+          .forEach(p => pairs.push(p));
+      });
+
+      // รอบ 2 — เพดานต่อ member: member 1 ตัวคงเส้นได้ไม่เกิน rule.memberCap (ใกล้สุด) ที่เหลือตัดทิ้ง
+      if (rule.memberCap) {
+        const byMember = new Map();
+        pairs.forEach(p => {
+          if (!byMember.has(p.m.id)) byMember.set(p.m.id, []);
+          byMember.get(p.m.id).push(p);
+        });
+        const keep = new Set();
+        byMember.forEach(list => {
+          list.sort((a, b) => a.d - b.d);
+          list.slice(0, rule.memberCap).forEach(p => keep.add(p));
+        });
+        pairs = pairs.filter(p => keep.has(p));
+      }
+
+      // รอบ 3 — วาด
+      pairs.forEach(p => drawLink(rule, styleFor(p.m), p.ancLL, p.mll, p.d));
+    });
+  }
+
+  function setVisible(on) {
+    visible = !!on;
+    if (visible) { lineGroup.addTo(map); labelGroup.addTo(map); recompute(); }
+    else { map.removeLayer(lineGroup); map.removeLayer(labelGroup); }
+    try { localStorage.setItem(LS_ON, visible ? '1' : '0'); } catch (e) {}
+  }
+
+  // ปรับความทึบเส้น/ป้ายโดยไม่ต้องสร้างใหม่ทั้งหมด
+  function applyOpacity() {
+    if (lineGroup) lineGroup.eachLayer(l => l.setStyle && l.setStyle({ opacity: (l._baseOp || 0.9) * opacity }));
+    document.querySelectorAll('.link-lbl').forEach(el => { el.style.opacity = labelOp().toFixed(2); });
+  }
+  function setOpacity(v) {
+    opacity = Math.max(0, Math.min(1, +v || 0));
+    applyOpacity();
+    try { localStorage.setItem(LS_OP, String(opacity)); } catch (e) {}
+  }
+
+  WR.links = {
+    init, recompute, setVisible, setOpacity,
+    isVisible: () => visible,
+    getOpacity: () => opacity,
+    count: () => linkCount,
   };
 })();
 
@@ -5766,8 +6039,11 @@ window.WR_GRAPHICS = [
     menu.appendChild(mkRow('กราฟิกยุทธการ', graphicsOn, v => setGraphicsOn(v), WR.draw.count()));
     if (WR.areas && WR.areas.count())
       menu.appendChild(mkRow('ขอบเขตพื้นที่', WR.areas.isVisible(), v => WR.areas.setVisible(v), WR.areas.count()));
+    if (WR.links)
+      menu.appendChild(mkRow('เส้นเชื่อมความสัมพันธ์', WR.links.isVisible(), v => WR.links.setVisible(v), WR.links.count(), '#ef4444'));
     const anyOff = WR_CATS.some(c => !WR.entities.isCatVisible(c.key)) || !graphicsOn
-      || (WR.areas && WR.areas.count() && !WR.areas.isVisible());
+      || (WR.areas && WR.areas.count() && !WR.areas.isVisible())
+      || (WR.links && !WR.links.isVisible());
     btn.classList.toggle('active', anyOff);
     btn.textContent = anyOff ? '⧉ เลเยอร์ •' : '⧉ เลเยอร์';
   }
@@ -6044,6 +6320,12 @@ window.WR_GRAPHICS = [
         on => { WR.areas.setVisible(on); buildLayerFilter(); }, WR.areas.count()));
       box.appendChild(sliderRow('ความทึบขอบเขตพื้นที่', WR.areas.getOpacity(), v => WR.areas.setOpacity(v)));
     }
+    if (WR.links) {
+      box.appendChild(switchRow('เส้นเชื่อมความสัมพันธ์ (ผู้ต้องสงสัย / โอสถ)', WR.links.isVisible(),
+        on => { WR.links.setVisible(on); buildLayerFilter(); }, WR.links.count(), '#ef4444'));
+      if (WR.links.getOpacity)
+        box.appendChild(sliderRow('ความทึบเส้นเชื่อมความสัมพันธ์', WR.links.getOpacity(), v => WR.links.setOpacity(v)));
+    }
     box.appendChild(el('div', null, '<hr style="border:0;border-top:1px solid var(--line-soft);margin:8px 0">'));
 
     // ขนาดสัญลักษณ์ (เทียบกับช่องกริด 1 ช่อง) — 1.0 = พอดี 1 ช่อง
@@ -6067,6 +6349,22 @@ window.WR_GRAPHICS = [
     });
     box.appendChild(switchRow('กราฟิกยุทธการ', graphicsOn,
       on => { setGraphicsOn(on); buildLayerFilter(); }, WR.draw.count()));
+
+    // กรองไอคอนตามชนิดหน่วย (ย้ายมาจากแท็กลอยบนแผนที่ — แสดงเมื่อมี ≥ 2 ชนิด)
+    const types = WR.entities.typesInUse();
+    if (types.length >= 2) {
+      box.appendChild(el('div', null, '<hr style="border:0;border-top:1px solid var(--line-soft);margin:8px 0">'));
+      const hd = el('div', 'layer-subhead');
+      hd.appendChild(el('span', null, 'กรองไอคอนตามชนิด'));
+      if (types.some(t => t.hidden)) {
+        const allBtn = el('button', 'btn', 'แสดงทั้งหมด');
+        allBtn.onclick = () => { WR.entities.showAllTypes(); syncAll(); };
+        hd.appendChild(allBtn);
+      }
+      box.appendChild(hd);
+      types.forEach(t => box.appendChild(switchRow(t.name, !t.hidden,
+        on => { WR.entities.setTypeVisible(t.defId, on); syncAll(); }, t.count)));
+    }
   }
   function switchRow(name, on, cb, count, dot) {
     const r = el('div', 'layer-row');
@@ -6151,6 +6449,7 @@ window.WR_GRAPHICS = [
 
   /* ---------- สถานะ / นาฬิกา ---------- */
   function syncAll() {
+    WR.links && WR.links.recompute();
     buildLayers();
     buildLayerFilter();
     buildTypeFilter();
@@ -6163,28 +6462,10 @@ window.WR_GRAPHICS = [
       `<div class="chip"><span class="d"></span>${({ none: 'ไม่มีแผนที่ฐาน', gsat: 'ดาวเทียม Google', ghyb: 'Google+ป้ายชื่อ', esri: 'ดาวเทียม Esri', osm: 'แผนที่ถนน', topo: 'ภูมิประเทศ', image: 'ภาพผังนำเข้า', xyz: 'XYZ' }[WR.state.basemap] || '')}</div>`;
   }
 
-  /* ---------- แท็กกรองไอคอนบนแผนที่ (ปิด/เปิดตามชนิด) ---------- */
+  /* ---------- แท็กกรองไอคอนตามชนิด — ย้ายไปอยู่ในแผง “เลเยอร์” แล้ว (buildLayers) ---------- */
   function buildTypeFilter() {
     const box = $('#type-filter'); if (!box) return;
-    const types = WR.entities.typesInUse();
-    box.innerHTML = '';
-    if (types.length < 2) { box.classList.remove('on'); return; }   // มีชนิดเดียว/ไม่มี ไม่ต้องแสดง
-    box.classList.add('on');
-    const anyHidden = types.some(t => t.hidden);
-    types.forEach(t => {
-      const def = WR.entities.catDef(t.defId);
-      const chip = el('button', 'tf-chip' + (t.hidden ? ' off' : ''));
-      chip.innerHTML = `<span class="tf-ico">${WR.SYM.palette(def)}</span>`
-        + `<span class="tf-name">${escapeHtml(t.name)}</span><span class="tf-n">${t.count}</span>`;
-      chip.title = (t.hidden ? 'แสดง' : 'ซ่อน') + ' “' + t.name + '” บนแผนที่';
-      chip.addEventListener('click', () => { WR.entities.setTypeVisible(t.defId, t.hidden); buildTypeFilter(); });
-      box.appendChild(chip);
-    });
-    if (anyHidden) {
-      const all = el('button', 'tf-chip tf-all', 'แสดงทั้งหมด');
-      all.addEventListener('click', () => { WR.entities.showAllTypes(); buildTypeFilter(); });
-      box.appendChild(all);
-    }
+    box.innerHTML = ''; box.classList.remove('on');   // ไม่แสดงแท็กลอยบนแผนที่อีกต่อไป
   }
   function startClock() {
     const upd = () => {
@@ -6342,7 +6623,10 @@ window.WR_GRAPHICS = [
     });
   }
 
-  onReady(() => { if (authed()) boot(); else showGate(); });
+  onReady(() => {
+    if (authed()) { document.body.classList.remove('locked'); boot(); }   // กลับเข้ามาในเซสชันเดิม — ปลดล็อกหน้าจอด้วย
+    else showGate();
+  });
 
   function boot() {
     // 1) แผนที่ + กริด
@@ -6356,6 +6640,7 @@ window.WR_GRAPHICS = [
 
     // 2) โมดูลบนแผนที่
     WR.entities.init();
+    WR.links && WR.links.init();     // เส้นเชื่อมความสัมพันธ์ (ผู้ต้องสงสัย ↔ หน่วยตอบโต้ใกล้สุด)
     WR.draw.init();
 
     // 3) UI
