@@ -895,7 +895,7 @@ body.dnd-grabbing, body.dnd-grabbing * { cursor: grabbing !important; }
 .tool span { font-size: 11.5px; line-height: 1.2; }
 
 /* ---------- ฟอร์มคุณสมบัติ ---------- */
-.field { margin-bottom: 9px; }
+.field { margin-bottom: 6px; }
 .field label { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-2); margin-bottom: 3px; }
 .field input, .field select, .field textarea {
   width: 100%; padding: 6px 8px; background: var(--bg-2);
@@ -903,19 +903,16 @@ body.dnd-grabbing, body.dnd-grabbing * { cursor: grabbing !important; }
 }
 .field textarea { resize: vertical; min-height: 52px; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.aff-pick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.aff-pick { display: flex; align-items: center; gap: 9px; padding: 2px 0; }
 .aff-pick button {
-  padding: 6px 2px; border-radius: 5px; border: 2px solid transparent; cursor: pointer;
-  background: var(--bg-2); color: var(--text-1); font-size: 10px;
+  width: 24px; height: 24px; padding: 0; border-radius: 50%; border: none; cursor: pointer;
+  flex: 0 0 auto;
 }
-.aff-pick button[data-a="friend"]  { border-color: var(--aff-friend); }
-.aff-pick button[data-a="hostile"] { border-color: var(--aff-hostile); }
-.aff-pick button[data-a="neutral"] { border-color: var(--aff-neutral); }
-.aff-pick button[data-a="unknown"] { border-color: var(--aff-unknown); }
-.aff-pick button.on[data-a="friend"]  { background: var(--aff-friend); color: #fff; }
-.aff-pick button.on[data-a="hostile"] { background: var(--aff-hostile); color: #fff; }
-.aff-pick button.on[data-a="neutral"] { background: var(--aff-neutral); color: #fff; }
-.aff-pick button.on[data-a="unknown"] { background: var(--aff-unknown); color: #111; }
+.aff-pick button[data-a="friend"]  { background: var(--aff-friend); }
+.aff-pick button[data-a="hostile"] { background: var(--aff-hostile); }
+.aff-pick button[data-a="neutral"] { background: var(--aff-neutral); }
+.aff-pick button[data-a="unknown"] { background: var(--aff-unknown); }
+.aff-pick button.on { box-shadow: 0 0 0 2px var(--bg-1), 0 0 0 4px #fff; }
 
 .btn {
   padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px;
@@ -972,6 +969,20 @@ body.dnd-grabbing, body.dnd-grabbing * { cursor: grabbing !important; }
 .map-readout .k { color: var(--text-2); }
 .map-readout .cell { color: var(--grid-label); font-weight: 700; font-size: 13px; }
 
+/* กรอบพิกัดอากาศยานตก — มุมล่างขวาของแผนที่เสมอ (แสดงเมื่อมีจุดอากาศยานตกอยู่บนแผนที่) */
+#crash-readout { left: auto; right: 10px; max-width: 240px; pointer-events: auto; }
+#crash-readout .crash-name { color: #fdba74; font-weight: 700; margin-bottom: 1px; }
+#crash-readout .cr-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  cursor: pointer; user-select: none; color: var(--text-1); font-weight: 700; font-size: 11px;
+}
+#crash-readout .cr-head .chev { transition: transform .15s; flex: 0 0 auto; }
+#crash-readout.collapsed .cr-head .chev { transform: rotate(-90deg); }
+#crash-readout .cr-body { margin-top: 4px; }
+#crash-readout.collapsed .cr-body { margin-top: 3px; }
+#crash-readout .cr-compact { color: #fdba74; }
+#crash-readout .cr-compact + .cr-compact { margin-top: 2px; }
+
 /* กล่องสถานะบนขวาของแผนที่ */
 .map-status {
   position: absolute; right: 10px; top: 10px; z-index: 450;
@@ -987,8 +998,15 @@ body.dnd-grabbing, body.dnd-grabbing * { cursor: grabbing !important; }
 .chip.friend .d { background: var(--aff-friend); }
 .chip.hostile .d { background: var(--aff-hostile); }
 
-/* ---------- ปุ่มกรองเลเยอร์ (ซ้ายบน ใต้ปุ่มซูม) ---------- */
-#layer-filter { position: absolute; left: 10px; top: 84px; z-index: 452; }
+/* ---------- แถบล่างซ้าย: พิกัด + ซูม + ปุ่มกรองเลเยอร์ ---------- */
+#map-bottomleft-stack {
+  position: absolute; left: 10px; bottom: 10px; z-index: 452;
+  display: flex; flex-direction: row; align-items: flex-end; gap: 8px;
+}
+#map-bottomleft-stack .map-readout { position: static; left: auto; bottom: auto; }
+#map-bottomleft-stack .leaflet-control-zoom { margin: 0 !important; }
+/* ---------- ปุ่มกรองเลเยอร์ ---------- */
+#layer-filter { position: relative; }
 #lf-toggle {
   background: rgba(9, 13, 18, .86); border: 1px solid var(--line); color: var(--text-0);
   border-radius: 6px; padding: 5px 9px; font-size: 11.5px; font-weight: 600;
@@ -997,7 +1015,8 @@ body.dnd-grabbing, body.dnd-grabbing * { cursor: grabbing !important; }
 #lf-toggle:hover { border-color: var(--accent); }
 #lf-toggle.active { border-color: var(--accent); color: var(--accent); }
 #lf-menu {
-  position: absolute; left: 0; top: calc(100% + 4px); min-width: 210px;
+  position: absolute; left: 0; bottom: calc(100% + 4px); min-width: 210px;
+  max-height: 60vh; overflow-y: auto;
   background: rgba(9, 13, 18, .95); border: 1px solid var(--line);
   border-radius: 8px; padding: 4px; box-shadow: var(--shadow); backdrop-filter: blur(4px);
 }
@@ -1012,6 +1031,103 @@ body.dnd-grabbing, body.dnd-grabbing * { cursor: grabbing !important; }
 .lf-row .lf-eye { font-size: 12px; width: 16px; text-align: center; }
 .lf-row.off { opacity: .5; }
 .lf-row.off .lf-name { text-decoration: line-through; }
+
+/* ---------- กองซ้อนแผงลอยซ้ายบนแผนที่ (ข้างปุ่มซูม): ค้นหาพิกัด / แจ้งพบข้าศึก / สั่งยิง ---------- */
+#map-left-stack {
+  position: absolute; left: 46px; top: 10px; z-index: 452;
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+}
+#coord-search {
+  display: flex; gap: 4px;
+}
+#coord-search input {
+  width: 200px; background: rgba(9, 13, 18, .86); border: 1px solid var(--line);
+  color: var(--text-0); border-radius: 6px; padding: 5px 9px;
+  font-size: 11.5px; font-family: var(--mono); backdrop-filter: blur(3px);
+}
+#coord-search input::placeholder { color: var(--text-2); font-family: var(--font); }
+#coord-search input.err { border-color: var(--crit); }
+#coord-search button {
+  background: rgba(9, 13, 18, .86); border: 1px solid var(--line); color: var(--text-0);
+  border-radius: 6px; padding: 5px 12px; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; backdrop-filter: blur(3px); white-space: nowrap;
+}
+#coord-search button:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---------- ช่องแจ้งพบเครื่องบินข้าศึก (โหมดสปภอ.เท่านั้น) ---------- */
+#hostile-detect {
+  background: rgba(9, 13, 18, .88); border: 1px solid var(--line); border-radius: 6px;
+  backdrop-filter: blur(3px); width: 200px; overflow: hidden;
+}
+#hostile-detect .hd-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 7px; font-size: 11px; font-weight: 700; color: #fff;
+  background: #7f1d1d; border-radius: 6px 6px 0 0;
+  white-space: nowrap; cursor: pointer;
+}
+#hostile-detect.collapsed .hd-head { border-radius: 6px; }
+#hostile-detect .hd-head .chev { transition: transform .15s; flex: 0 0 auto; }
+#hostile-detect.collapsed .hd-head .chev { transform: rotate(-90deg); }
+#hostile-detect .hd-body {
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 0 7px 7px;
+}
+#hostile-detect.collapsed .hd-body { display: none; }
+#hostile-detect .hd-row { display: flex; gap: 4px; }
+#hostile-detect input {
+  width: 0; flex: 1; background: rgba(255, 255, 255, .04); border: 1px solid var(--line);
+  color: var(--text-0); border-radius: 5px; padding: 4px 6px; font-size: 11px; font-family: var(--mono);
+}
+#hostile-detect input::placeholder { color: var(--text-2); font-family: var(--font); }
+#hostile-detect button {
+  background: var(--crit); border: 1px solid var(--crit); color: #fff;
+  border-radius: 5px; padding: 5px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+}
+#hostile-detect button:hover { filter: brightness(1.1); }
+
+/* ---------- แผงสั่งยิงเครื่องบินข้าศึก (โผล่อัตโนมัติทุกลำที่จำลองอยู่ — ไม่ต้องคลิกเลือก, โหมดสปภอ.เท่านั้น) ---------- */
+#hostile-fire {
+  background: rgba(9, 13, 18, .88); border: 1px solid var(--line); border-radius: 6px;
+  backdrop-filter: blur(3px); width: 200px; overflow: hidden; max-height: 260px; overflow-y: auto;
+}
+#hostile-fire .hf-head {
+  padding: 7px; font-size: 11px; font-weight: 700; color: #fff;
+  background: #7f1d1d; white-space: nowrap; position: sticky; top: 0;
+}
+#hostile-fire .hf-body { display: flex; flex-direction: column; padding: 7px; }
+#hostile-fire .hf-row { display: flex; flex-direction: column; gap: 5px; padding-top: 7px; margin-top: 7px; border-top: 1px solid var(--line-soft); }
+#hostile-fire .hf-row:first-child { padding-top: 0; margin-top: 0; border-top: none; }
+#hostile-fire .hf-target { font-size: 12px; font-weight: 700; color: var(--text-0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#hostile-fire select {
+  background: rgba(255, 255, 255, .04); border: 1px solid var(--line);
+  color: var(--text-0); border-radius: 5px; padding: 4px 6px; font-size: 11px;
+}
+#hostile-fire button {
+  background: var(--crit); border: 1px solid var(--crit); color: #fff;
+  border-radius: 5px; padding: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+}
+#hostile-fire button:hover { filter: brightness(1.1); }
+#hostile-fire button:disabled { background: var(--bg-3); border-color: var(--line); color: var(--text-2); cursor: default; filter: none; }
+
+/* ป้ายกลางเส้นติดตามข้าศึกสด (hostilesim.js) — เอียงตามแนวเส้นเหมือนป้ายเส้นเชื่อมความสัมพันธ์ */
+.track-lbl {
+  display: inline-block; white-space: nowrap; font-size: 10px; font-weight: 700;
+  padding: 1px 5px; border-radius: 3px; line-height: 1.3;
+  background: rgba(11, 15, 20, .85); border: 1px solid #22c55e; color: #86efac;
+  text-shadow: 0 0 2px #000; pointer-events: none;
+}
+
+/* จุดกากบาทชั่วคราวตอนค้นหาพิกัดเจอ — กะพริบแล้วหายไปเอง */
+.coord-search-pin {
+  width: 22px; height: 22px; position: relative;
+  filter: drop-shadow(0 0 5px rgba(56, 189, 248, .9));
+}
+.coord-search-pin::before, .coord-search-pin::after {
+  content: ''; position: absolute; background: #38bdf8;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
+.coord-search-pin::before { width: 22px; height: 2px; }
+.coord-search-pin::after { width: 2px; height: 22px; }
 
 /* ---------- แท็กกรองไอคอนตามชนิด (บนแผนที่ ซ้ายบน ใต้ปุ่มเลเยอร์) ---------- */
 #type-filter {
@@ -1157,6 +1273,8 @@ kbd {
 .link-lbl.blue { color: #bfdbfe; border-color: rgba(59, 130, 246, .6); }
 .link-lbl.yellow { color: #fde68a; border-color: rgba(234, 179, 8, .55); }
 .link-lbl.orange { color: #fdba74; border-color: rgba(249, 115, 22, .55); }
+.link-lbl.purple { color: #e9d5ff; border-color: rgba(168, 85, 247, .6); }
+.link-lbl.cyan { color: #a5f3fc; border-color: rgba(6, 182, 212, .6); }
 .link-lbl.bright {
   color: #e0f2fe; border-color: #38bdf8;
   box-shadow: 0 0 7px rgba(56, 189, 248, .75), inset 0 0 6px rgba(56, 189, 248, .3);
@@ -1164,12 +1282,58 @@ kbd {
 /* เส้นเชื่อมความสำคัญเร่งด่วนสูงสุด (หน่วยถูกทำลาย) — เรืองแสง */
 .link-urgent { filter: drop-shadow(0 0 3px rgba(56, 189, 248, .95)); }
 
+/* วงรัศมีอันตราย 100 ม. (hazard.js) — เส้นขอบแดงเรืองแสง โดดเด่น กะพริบเบา ๆ */
+.hazard-ring {
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, .9)) drop-shadow(0 0 12px rgba(239, 68, 68, .55));
+  animation: hazardPulse 1.6s ease-in-out infinite;
+}
+@keyframes hazardPulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(239, 68, 68, .9)) drop-shadow(0 0 12px rgba(239, 68, 68, .5)); }
+  50% { filter: drop-shadow(0 0 10px rgba(239, 68, 68, 1)) drop-shadow(0 0 18px rgba(239, 68, 68, .85)); }
+}
+
+/* วงรัศมี PISTOL/ARROW กระพริบแดง — เครื่องบินข้าศึกเข้ารัศมี (app.js WR.seedRings.setAlert) */
+.ring-alert { animation: ringAlertBlink 0.9s ease-in-out infinite; }
+@keyframes ringAlertBlink {
+  0%, 100% { fill: #ef4444; fill-opacity: .02; stroke: #ef4444; stroke-opacity: .5; }
+  50% { fill: #ef4444; fill-opacity: .5; stroke: #ef4444; stroke-opacity: .9; }
+}
+
 /* ป้ายชื่อเลเยอร์ขอบเขตพื้นที่ */
 .area-lbl {
   display: inline-block; font-size: 10px; font-weight: 700; white-space: nowrap;
   padding: 1px 5px; border-radius: 3px; line-height: 1.3;
   background: rgba(11, 15, 20, .7); border: 1px solid currentColor;
   text-shadow: 0 0 2px #000, 0 0 3px #000; pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+/* สปภอ. — ป้ายชื่อโซน / ป้ายระยะวงแหวน / จุดศูนย์กลางสนาม (afdz.js) */
+.afdz-zone-lbl {
+  display: inline-block; text-align: center; white-space: nowrap;
+  font-size: 11px; font-weight: 800; line-height: 1.35;
+  padding: 2px 7px; border-radius: 4px;
+  background: rgba(11, 15, 20, .8); border: 1px solid currentColor;
+  text-shadow: 0 0 2px #000, 0 0 3px #000; pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.afdz-ring-lbl {
+  display: inline-block; white-space: nowrap; font-size: 9.5px; font-weight: 700;
+  padding: 0px 4px; border-radius: 3px; line-height: 1.3;
+  background: rgba(11, 15, 20, .65); border: 1px solid rgba(203, 213, 225, .5);
+  color: #cbd5e1; text-shadow: 0 0 2px #000; pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.afdz-deg-lbl {
+  display: inline-block; white-space: nowrap; font-size: 9px; font-weight: 700;
+  padding: 0px 3px; border-radius: 2px; line-height: 1.25;
+  background: rgba(11, 15, 20, .55); color: #94a3b8;
+  text-shadow: 0 0 2px #000; pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.afdz-center-dot {
+  position: absolute; left: 0; top: 0; width: 8px; height: 8px; border-radius: 50%;
+  background: #fff; border: 2px solid #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, .9);
   transform: translate(-50%, -50%);
 }
 
@@ -1232,7 +1396,7 @@ body.locked #app { display: none; }
 }
 
 </style>
-<!-- build: single-file bundle (build/bundle.mjs) — 2026-09-10T14:59:00.271Z -->
+<!-- build: single-file bundle (build/bundle.mjs) — 2026-09-13T20:23:44.634Z -->
 </head>
 <body class="locked">
 
@@ -1261,6 +1425,9 @@ body.locked #app { display: none; }
     <div class="sep"></div>
     <button class="tbtn" id="t-replay" title="เล่นย้อนเหตุการณ์ (R)">⏱ เล่นย้อน</button>
     <div class="sep"></div>
+    <button class="tbtn on" id="t-mode-ground" title="แผนที่ป้องกันที่ตั้งภาคพื้น">🛡 สปฐบ.</button>
+    <button class="tbtn" id="t-mode-air" title="แผนที่ป้องกันภัยทางอากาศ">🎯 สปภอ.</button>
+    <div class="sep"></div>
     <button class="tbtn ghost" id="t-present" title="โหมดนำเสนอ (P)">⛶ นำเสนอ</button>
     <button class="tbtn ghost" id="t-help" title="ช่วยเหลือ / คีย์ลัด (?)">?</button>
     <div class="spacer"></div>
@@ -1286,10 +1453,10 @@ body.locked #app { display: none; }
           <div class="field" style="margin-top:10px">
             <label>ฝ่าย/สีของกราฟิกที่วาด</label>
             <div class="aff-pick" id="draw-aff">
-              <button class="on" data-a="friend">ฝ่ายเรา</button>
-              <button data-a="hostile">ข้าศึก</button>
-              <button data-a="neutral">เป็นกลาง</button>
-              <button data-a="unknown">ไม่ทราบ</button>
+              <button class="on" data-a="friend" title="ฝ่ายเรา"></button>
+              <button data-a="hostile" title="ข้าศึก"></button>
+              <button data-a="neutral" title="เป็นกลาง"></button>
+              <button data-a="unknown" title="ไม่ทราบ"></button>
             </div>
           </div>
           <label style="display:flex;align-items:center;gap:6px;color:var(--text-1);margin-top:6px">
@@ -1304,11 +1471,43 @@ body.locked #app { display: none; }
   <main id="map">
     <button class="map-tab" id="toggle-left" title="ย่อ/ขยายแผงซ้าย">‹</button>
     <button class="map-tab" id="toggle-right" title="ย่อ/ขยายแผงขวา">›</button>
-    <div class="map-readout" id="readout"></div>
+    <div class="map-readout" id="crash-readout" hidden>
+      <div class="cr-head" id="cr-head"><span>อากาศยานตก</span><span class="chev">▾</span></div>
+      <div class="cr-body" id="cr-body"></div>
+    </div>
     <div class="map-status" id="status-chips"></div>
-    <div id="layer-filter">
-      <button id="lf-toggle" title="กรองเลเยอร์ — เปิด/ปิดกลุ่มไอคอนที่ต้องการดู">⧉ เลเยอร์</button>
-      <div id="lf-menu" hidden></div>
+    <div id="map-bottomleft-stack">
+      <div class="map-readout" id="readout"></div>
+      <div id="layer-filter">
+        <button id="lf-toggle" title="กรองเลเยอร์ — เปิด/ปิดกลุ่มไอคอนที่ต้องการดู">⧉ เลเยอร์</button>
+        <div id="lf-menu" hidden></div>
+      </div>
+    </div>
+    <div id="map-left-stack">
+      <div id="coord-search">
+        <input id="coord-search-input" placeholder="ค้นหาพิกัด (DDM หรือ MGRS)…" autocomplete="off">
+        <button id="coord-search-go" title="ไปยังพิกัด">ไป</button>
+      </div>
+      <div id="hostile-detect">
+        <div class="hd-head" id="hd-head">
+          <span>🛩 แจ้งพบเครื่องบินข้าศึก (สปภอ.)</span><span class="chev">▾</span>
+        </div>
+        <div class="hd-body" id="hd-body">
+          <div class="hd-row">
+            <input id="hd-radial" type="number" min="0" max="359" placeholder="Radial °">
+            <input id="hd-dme" type="number" min="0" step="0.1" placeholder="DME (NM)">
+          </div>
+          <div class="hd-row">
+            <input id="hd-heading" type="number" min="0" max="359" placeholder="ทิศบิน °">
+            <input id="hd-speed" type="number" min="1" value="400" placeholder="ความเร็ว (kt)">
+          </div>
+          <button id="hd-submit">ส่งข้อมูล</button>
+        </div>
+      </div>
+      <div id="hostile-fire" hidden>
+        <div class="hf-head">🎯 สั่งยิงเครื่องบินข้าศึก</div>
+        <div class="hf-body" id="hf-list"></div>
+      </div>
     </div>
     <div id="type-filter"></div>
     <div class="hint-bar" id="hintbar"></div>
@@ -4412,7 +4611,7 @@ window.WR_CATALOG = [
   /* ---------- กลุ่มที่ ๒ : ส่วนการปฏิบัติการ ---------- */
   { id: 'phali',    name: 'พาลี',    cat: 'ops', file: 'SHOOTER.png',       aff: 'friend' },
   { id: 'nonthuk',  name: 'นนทุกข์', cat: 'ops', file: 'C2.png',            aff: 'friend' },
-  { id: 'morakot',  name: 'มรกต',    cat: 'ops', file: 'Anti Aircraft.png', aff: 'friend' },
+  { id: 'morakot',  name: 'มรกต',    cat: 'ops', file: 'Anti Aircraft.png', aff: 'friend', fireArc: true },
   { id: 'pistol',   name: 'PISTOL',  cat: 'ops', file: 'PISTOL.png',        aff: 'friend' },
   { id: 'arrow',    name: 'ARROW',   cat: 'ops', file: 'ARROW.png',         aff: 'friend' },
   { id: 'sam-yot',  name: 'สามยอด',  cat: 'ops', file: 'MP.png',            aff: 'friend' },
@@ -4429,9 +4628,9 @@ window.WR_CATALOG = [
   { id: 'khangkhao',name: 'ค้างคาว', cat: 'ops', file: 'RADAR.png',         aff: 'friend' },
 
   /* ---------- กลุ่มที่ ๓ : อื่นๆ ---------- */
-  { id: 'fighter',     name: 'FIGHTER',                 cat: 'other', file: 'FIGHTER.png',     aff: 'friend' },
-  { id: 'helicopter',  name: 'HELICOPTER',              cat: 'other', file: 'HELICOPTER.png',  aff: 'friend' },
-  { id: 'drone',       name: 'DRONE',                   cat: 'other', file: 'DRONE.png',       aff: 'unknown' },
+  { id: 'fighter',     name: 'FIGHTER',                 cat: 'other', file: 'FIGHTER.png',     aff: 'friend', rot: true },
+  { id: 'helicopter',  name: 'HELICOPTER',              cat: 'other', file: 'HELICOPTER.png',  aff: 'friend', rot: true },
+  { id: 'drone',       name: 'DRONE',                   cat: 'other', file: 'DRONE.png',       aff: 'unknown', rot: true },
   { id: 'crash',       name: 'อากาศยานตก',              cat: 'other', file: 'CRASH.png',       aff: 'neutral' },
   { id: 'fire',        name: 'เพลิงไหม้',                cat: 'other', file: 'FIRE.png',        aff: 'neutral' },
   { id: 'danger-bomb', name: 'วัตถุต้องสงสัย/วัตถุระเบิด', cat: 'other', file: 'DANGER_BOMB.png', aff: 'neutral' },
@@ -4526,11 +4725,21 @@ window.WR_GRAPHICS = [
 
   let map, gridLayer, labelLayer, hiRect;
   let panes = {};
+  let viewMode = 'ground';   // 'ground' (สปฐบ.) | 'air' (สปภอ.) — ควบคุมขอบเขตซูม/แพน
 
   function gridBounds() {
     const b = GRID.meta.bounds;
     return L.latLngBounds([b.south, b.west], [b.north, b.east]);
   }
+
+  // กรอบมุมมองรอบศูนย์ สปภอ. ให้เห็นวงแหวนสุด 40 NM (มีระยะเผื่อ ~1 NM)
+  function airBounds() {
+    const c = WR.afdz && WR.afdz.center();
+    if (!c) return gridBounds().pad(0.06);
+    const d = (41 * 1852) / 111320;   // องศาโดยประมาณ
+    return L.latLngBounds([c.lat - d, c.lng - d], [c.lat + d, c.lng + d]);
+  }
+  function fitBoundsFor(mode) { return mode === 'air' ? airBounds() : gridBounds().pad(0.06); }
 
   // ขนาดหน้าจอ (พิกเซล) ของช่องกริด 1 ช่อง ณ ระดับซูมปัจจุบัน
   function cellPx() {
@@ -4544,12 +4753,16 @@ window.WR_GRAPHICS = [
 
   function init(elId) {
     map = L.map(elId, {
-      zoomControl: true,
+      zoomControl: false,
       attributionControl: true,
       minZoom: 12, maxZoom: 21,
       zoomSnap: 0.25, wheelPxPerZoomLevel: 90,
       zoomAnimation: false, fadeAnimation: false, markerZoomAnimation: false,
     });
+    const zoomCtl = L.control.zoom({ position: 'bottomleft' }).addTo(map);
+    const blStack = document.getElementById('map-bottomleft-stack');
+    const lfBtn = document.getElementById('layer-filter');
+    if (blStack) blStack.insertBefore(zoomCtl.getContainer(), lfBtn || null);
     map.setMaxBounds(gridBounds().pad(1.2));
 
     // ปรับขนาด/จัดกรอบให้พอดี — retry จนกว่าคอนเทนเนอร์จะมีขนาดจริง
@@ -4561,11 +4774,11 @@ window.WR_GRAPHICS = [
       if (map._loaded) map.invalidateSize(false);
       const s = new L.Point(container.clientWidth || 0, container.clientHeight || 0);
       if (s.x > 60 && s.y > 60) {
-        map.fitBounds(gridBounds().pad(0.06));
+        map.fitBounds(fitBoundsFor(viewMode));
         fitted = true;
         return true;
       }
-      if (!map._loaded) map.setView(gridBounds().getCenter(), 14);
+      if (!map._loaded) map.setView(fitBoundsFor(viewMode).getCenter(), 14);
       return false;
     }
     const realSize = () => (container.clientWidth || 0) > 60 && (container.clientHeight || 0) > 60;
@@ -4672,9 +4885,13 @@ window.WR_GRAPHICS = [
     };
     return `${ddm(ll.lat, 'N', 'S')}  ${ddm(ll.lng, 'E', 'W')}`;
   }
+  // ย่อรูปแบบ MGRS ให้สั้นลง — ตัด zone/latitude band ออก เหลือแค่กริดสแควร์ 2 ตัวอักษร + 6 หลัก (ระยะ 100 ม.)
+  // เช่น "47PPS746405" → "PS746405"
   function fmtMGRS(ll) {
-    try { return window.mgrs.forward([ll.lng, ll.lat], 4); }
-    catch (e) { return '—'; }
+    try {
+      const full = window.mgrs.forward([ll.lng, ll.lat], 3);
+      return full.replace(/^\d{1,2}[A-Za-z]/, '');
+    } catch (e) { return '—'; }
   }
 
   /* ---------- highlight ช่องใต้เมาส์ ---------- */
@@ -4736,11 +4953,26 @@ window.WR_GRAPHICS = [
     gridLayer.eachLayer(l => l.setStyle && l.setStyle({ opacity: v * (l.options.weight >= 2 ? 1 : 0.6) }));
   }
 
+  /* ---------- ขอบเขตการซูม/แพน: สปฐบ. (กริดฐานบิน) ↔ สปภอ. (วงแหวน 40 NM) ----------
+     ค่าเริ่มต้น (minZoom 12 + maxBounds รอบกริด) แคบเกินไปสำหรับวงแหวน 40 NM ของ สปภอ.
+     ต้องคลายขอบเขตชั่วคราวตอนสลับไปโหมดอากาศ แล้วคืนค่าเดิมตอนกลับมาโหมดพื้น */
+  function setViewMode(mode) {
+    viewMode = mode === 'air' ? 'air' : 'ground';
+    if (viewMode === 'air') {
+      map.setMinZoom(6);
+      map.setMaxBounds(null);
+    } else {
+      map.setMinZoom(12);
+      map.setMaxBounds(gridBounds().pad(1.2));
+    }
+    map.fitBounds(fitBoundsFor(viewMode));
+  }
+
   WR.core = {
     init, drawGrid, gridBounds, cellAt, cellPx, fmtLatLng, fmtMGRS,
     highlightCell, clearHighlight,
     setBasemap, setImageOverlay, setBasemapOpacity,
-    showGrid, showLabels, setGridOpacity,
+    showGrid, showLabels, setGridOpacity, setViewMode,
     get map() { return map; },
   };
 })();
@@ -4829,16 +5061,211 @@ window.WR_GRAPHICS = [
 </script>
 <script>
 /* =========================================================================
+   afdz.js — สปภอ. (พื้นที่ป้องกันภัยทางอากาศ): วงแหวนระยะรอบสนามบิน
+   ศูนย์: 14°52.480′N 100°39.800′E · วงแหวนอ้างอิงทุก 5 NM ถึง 40 NM
+   โซน: FREE FIRE (0-15NM แดง) · BREAK AWAY (15-20NM ส้ม)
+        · BUFFER (20-25NM เหลือง) · WARNING (20-30NM ฟ้า ไม่มีพื้นสี)
+   เปิด/ปิดทั้งเลเยอร์ผูกกับปุ่มโหมดแผนที่ (ui.js setMapMode) · ปรับความทึบแต่ละโซนได้
+   ========================================================================= */
+(function () {
+  const WR = (window.WR = window.WR || {});
+  const NM = 1852;                 // เมตรต่อ 1 ไมล์ทะเล
+  const R_EARTH = 6371000;
+
+  // จุดกึ่งกลางสนาม 14°52.480′N 100°39.800′E (DMM -> ทศนิยม)
+  const CENTER = { lat: 14 + 52.480 / 60, lng: 100 + 39.800 / 60 };
+  const RING_NM = [5, 10, 15, 20, 25, 30, 35, 40];
+
+  const ZONES = [
+    { id: 'freefire', name: 'FREE FIRE ZONE', innerNM: 0, outerNM: 15, color: '#ef4444', labelBearing: 0 },
+    { id: 'breakaway', name: 'BREAK AWAY ZONE', innerNM: 15, outerNM: 20, color: '#f97316', labelBearing: 90 },
+    { id: 'buffer', name: 'BUFFER ZONE', innerNM: 20, outerNM: 25, color: '#eab308', labelBearing: 180 },
+    { id: 'warning', name: 'WARNING ZONE', innerNM: 20, outerNM: 30, color: '#3b82f6', labelBearing: 270, noFill: true },
+  ];
+  const LS_OP = id => 'wr_afdz_op_' + id;
+  const RADIAL_STEP = 10;    // เส้นแบ่งองศาแบบจอเรดาร์ ทุก 10°
+  const RADIAL_LABEL_STEP = 30;   // ป้ายกำกับองศา — ทุก 30° กันรกตา
+
+  let map, zoneGroup, ringGroup, radialGroup, labelGroup, visible = false;
+  const opacity = { freefire: 0.35, breakaway: 0.3, buffer: 0.25 };
+  const zoneLabelMarkers = {};   // id -> L.marker (ไว้ปรับความทึบป้ายให้ตามพื้นที่)
+
+  // จุดปลายทางจากศูนย์ ตามแบริ่ง(องศา)+ระยะ(เมตร) — great-circle
+  function destPoint(bearingDeg, distM) {
+    const br = bearingDeg * Math.PI / 180;
+    const lat1 = CENTER.lat * Math.PI / 180, lng1 = CENTER.lng * Math.PI / 180;
+    const dR = distM / R_EARTH;
+    const lat2 = Math.asin(Math.sin(lat1) * Math.cos(dR) + Math.cos(lat1) * Math.sin(dR) * Math.cos(br));
+    const lng2 = lng1 + Math.atan2(Math.sin(br) * Math.sin(dR) * Math.cos(lat1), Math.cos(dR) - Math.sin(lat1) * Math.sin(lat2));
+    return [lat2 * 180 / Math.PI, ((lng2 * 180 / Math.PI) + 540) % 360 - 180];
+  }
+  function circlePts(radiusM, n) {
+    n = n || 144;
+    const pts = [];
+    for (let i = 0; i < n; i++) pts.push(destPoint(i * 360 / n, radiusM));
+    return pts;
+  }
+
+  function init() {
+    map = WR.core.map;
+    ['afdzZones', 'afdzRadial', 'afdzRings', 'afdzLabels'].forEach((name, i) => {
+      if (!map.getPane(name)) {
+        map.createPane(name);
+        map.getPane(name).style.zIndex = 210 + i;   // เหนือ basemap(200) ใต้ทุกเลเยอร์ของสปฐบ.
+        map.getPane(name).style.pointerEvents = 'none';
+      }
+    });
+    zoneGroup = L.layerGroup([], { pane: 'afdzZones' });
+    radialGroup = L.layerGroup([], { pane: 'afdzRadial' });
+    ringGroup = L.layerGroup([], { pane: 'afdzRings' });
+    labelGroup = L.layerGroup([], { pane: 'afdzLabels' });
+
+    try {
+      ZONES.forEach(z => {
+        if (z.noFill) return;
+        const o = parseFloat(localStorage.getItem(LS_OP(z.id)));
+        if (!isNaN(o)) opacity[z.id] = o;
+      });
+    } catch (e) {}
+
+    buildZones();
+    buildRadials();
+    buildRings();
+    buildCenter();
+  }
+
+  function zonePolygon(z) {
+    const outer = circlePts(z.outerNM * NM);
+    const rings = z.innerNM > 0 ? [outer, circlePts(z.innerNM * NM).reverse()] : [outer];
+    return L.polygon(rings, {
+      pane: 'afdzZones', color: z.color, weight: 2.5, opacity: 1,
+      fill: !z.noFill, fillColor: z.color, fillOpacity: z.noFill ? 0 : opacity[z.id],
+      interactive: false, lineJoin: 'round',
+    });
+  }
+
+  const labelOpacity = id => Math.max(0.3, opacity[id] ?? 1);
+
+  function buildZones() {
+    ZONES.forEach(z => {
+      const poly = zonePolygon(z);
+      poly._zone = z.id;
+      poly.addTo(zoneGroup);
+      const mid = (z.innerNM + z.outerNM) / 2 * NM;
+      const p = destPoint(z.labelBearing, mid);
+      const op = z.noFill ? 1 : labelOpacity(z.id);
+      const mk = L.marker(p, {
+        pane: 'afdzLabels', interactive: false,
+        icon: L.divIcon({
+          className: '', iconSize: [10, 10],
+          html: `<div class="afdz-zone-lbl" style="color:${z.color};border-color:${z.color};opacity:${op}">${z.name}<br>${z.innerNM}-${z.outerNM} NM</div>`,
+        }),
+      });
+      mk.addTo(labelGroup);
+      zoneLabelMarkers[z.id] = mk;
+    });
+  }
+
+  // เส้นแบ่งองศาแบบจอเรดาร์ — ทุก 10° จากศูนย์ถึงวงนอกสุด (40 NM) + ป้ายองศาทุก 30°
+  function buildRadials() {
+    const maxR = RING_NM[RING_NM.length - 1] * NM;
+    for (let b = 0; b < 360; b += RADIAL_STEP) {
+      L.polyline([CENTER, destPoint(b, maxR)], {
+        pane: 'afdzRadial', color: '#94a3b8', weight: 1, opacity: 0.32, interactive: false,
+      }).addTo(radialGroup);
+      if (b % RADIAL_LABEL_STEP === 0) {
+        const p = destPoint(b, maxR + 1 * NM);
+        L.marker(p, {
+          pane: 'afdzLabels', interactive: false,
+          icon: L.divIcon({ className: '', iconSize: [10, 10], html: `<div class="afdz-deg-lbl">${b}°</div>` }),
+        }).addTo(labelGroup);
+      }
+    }
+  }
+
+  function buildRings() {
+    RING_NM.forEach(r => {
+      L.circle(CENTER, {
+        pane: 'afdzRings', radius: r * NM, color: '#cbd5e1', weight: 1,
+        opacity: 0.5, dashArray: '4 5', fill: false, interactive: false,
+      }).addTo(ringGroup);
+      const p = destPoint(45, r * NM);
+      L.marker(p, {
+        pane: 'afdzLabels', interactive: false,
+        icon: L.divIcon({ className: '', iconSize: [10, 10], html: `<div class="afdz-ring-lbl">${r} NM</div>` }),
+      }).addTo(labelGroup);
+    });
+  }
+
+  function buildCenter() {
+    L.marker(CENTER, {
+      pane: 'afdzLabels', interactive: false,
+      icon: L.divIcon({
+        className: '', iconSize: [0, 0], iconAnchor: [0, 0],
+        html: `<div class="afdz-center-dot"></div>`,
+      }),
+    }).addTo(labelGroup);
+  }
+
+  function setVisible(on) {
+    visible = !!on;
+    if (!zoneGroup) return;
+    if (visible) { zoneGroup.addTo(map); radialGroup.addTo(map); ringGroup.addTo(map); labelGroup.addTo(map); }
+    else { map.removeLayer(zoneGroup); map.removeLayer(radialGroup); map.removeLayer(ringGroup); map.removeLayer(labelGroup); }
+  }
+  function isVisible() { return visible; }
+
+  function setOpacity(id, v) {
+    if (!(id in opacity)) return;
+    opacity[id] = Math.max(0, Math.min(1, +v || 0));
+    zoneGroup.eachLayer(l => { if (l._zone === id) l.setStyle({ fillOpacity: opacity[id] }); });
+    const mk = zoneLabelMarkers[id];
+    const el = mk && mk.getElement();
+    const div = el && el.querySelector('.afdz-zone-lbl');
+    if (div) div.style.opacity = labelOpacity(id);
+    try { localStorage.setItem(LS_OP(id), String(opacity[id])); } catch (e) {}
+  }
+  function getOpacity(id) { return opacity[id] || 0; }
+
+  // Radial (แบริ่งจริงจากศูนย์ สปภอ. ไปยังจุดใด ๆ) / DME (ระยะไมล์ทะเล) — ใช้ร่วมกันทั้งแอป
+  // (หน่วยประจำที่ถาวรใน app.js, ป้าย popup ของทุกไอคอนใน entities.js, ช่องพิกัดใต้เมาส์ใน app.js)
+  function radialDme(lat, lng) {
+    if (!map) return '';
+    const r = Math.PI / 180;
+    const y = Math.sin((lng - CENTER.lng) * r) * Math.cos(lat * r);
+    const x = Math.cos(CENTER.lat * r) * Math.sin(lat * r) - Math.sin(CENTER.lat * r) * Math.cos(lat * r) * Math.cos((lng - CENTER.lng) * r);
+    const brg = (Math.atan2(y, x) / r + 360) % 360;
+    const dNM = map.distance([CENTER.lat, CENTER.lng], [lat, lng]) / 1852;
+    return `R${String(Math.round(brg)).padStart(3, '0')}°/${dNM.toFixed(1)} DME`;
+  }
+  // ผกผัน radialDme() — หาพิกัด lat/lng จาก Radial(องศา)+DME(ไมล์ทะเล) เทียบศูนย์ สปภอ.
+  function fromRadialDme(radialDeg, dmeNM) {
+    const p = destPoint(radialDeg, dmeNM * NM);
+    return { lat: p[0], lng: p[1] };
+  }
+
+  WR.afdz = {
+    init, setVisible, isVisible, setOpacity, getOpacity, radialDme, fromRadialDme,
+    center: () => CENTER,
+    zones: () => ZONES.map(z => ({ id: z.id, name: z.name, color: z.color, noFill: !!z.noFill })),
+  };
+})();
+
+</script>
+<script>
+/* =========================================================================
    entities.js — หน่วย/สัญลักษณ์บนแผนที่: วาง เลือก แก้ไข ลาก หมุน จัดชั้น
    ========================================================================= */
 (function () {
   const WR = (window.WR = window.WR || {});
   const CAT_BY_ID = Object.fromEntries(window.WR_CATALOG.map(d => [d.id, d]));
+  // ไอคอนอากาศยานที่วางเองแล้วเปิดจำลองการเคลื่อนที่อัตโนมัติทันที (เหมือนฟอร์มแจ้งพบเครื่องบินข้าศึก) — ความเร็วเริ่มต้นต่อชนิด (knot)
+  const SIM_DEFAULT_SPEED_KT = { fighter: 400, helicopter: 100, drone: 40 };
 
   let map, groups = {}, items = new Map(), selId = null, armedDef = null, seq = 1;
   const hiddenTypes = new Set();   // defId ที่ถูกปิดการมองเห็นด้วยแท็กกรอง
   const hiddenCats = new Set();    // key กลุ่มที่ถูกปิดการมองเห็น (ปุ่มกรองเลเยอร์)
-  const AFF_TH = { friend: 'ฝ่ายเรา', hostile: 'ข้าศึก', neutral: 'เป็นกลาง', unknown: 'ไม่ทราบฝ่าย' };
+  let modeAllow = null;            // ชุด defId ที่อนุญาตให้แสดงในโหมดปัจจุบัน (null = ไม่จำกัด เช่น โหมดสปฐบ.)
   const ST_TH = { ok: 'ปกติ', dmg: 'เสียหาย', dead: 'ถูกทำลาย' };
   const listeners = { select: [], change: [] };
   const on = (ev, fn) => listeners[ev].push(fn);
@@ -4876,46 +5303,78 @@ window.WR_GRAPHICS = [
     });
   }
 
+  // แบริ่งจาก (lat1,lng1) ไป (lat2,lng2) — องศา 0-360
+  function bearingTo(lat1, lng1, lat2, lng2) {
+    const r = Math.PI / 180;
+    const y = Math.sin((lng2 - lng1) * r) * Math.cos(lat2 * r);
+    const x = Math.cos(lat1 * r) * Math.sin(lat2 * r) - Math.sin(lat1 * r) * Math.cos(lat2 * r) * Math.cos((lng2 - lng1) * r);
+    return (Math.atan2(y, x) / r + 360) % 360;
+  }
+
   function add(defId, latlng, extra = {}) {
     const def = CAT_BY_ID[defId];
     if (!def) return null;
+    // วางไอคอนอากาศยานเอง (FIGHTER/HELICOPTER/DRONE) — ไม่ใช่โหลดสถานการณ์/สร้างผ่านฟอร์มแจ้งพบที่กำหนดค่ามาแล้ว
+    // → เปิดการจำลองเคลื่อนที่ให้อัตโนมัติด้วยความเร็วเริ่มต้นตามชนิด เหมือนฟอร์มแจ้งพบเครื่องบินข้าศึก
+    let simSpeedKt = extra.simSpeedKt ?? null;
+    let heading = extra.heading;
+    if (defId in SIM_DEFAULT_SPEED_KT && simSpeedKt == null && !extra.silent) {
+      simSpeedKt = SIM_DEFAULT_SPEED_KT[defId];
+      if (heading == null) {
+        const c = WR.afdz && WR.afdz.center();
+        if (c) heading = Math.round(bearingTo(latlng.lat, latlng.lng, c.lat, c.lng));
+      }
+    }
+    // สุ่มจำนวนครั้งที่ต้องยิงถึงจะถูกทำลาย (1-3) — สุ่มครั้งเดียวตอนเริ่มจำลอง ไม่สุ่มซ้ำตอนโหลดสถานการณ์เดิม
+    let killShotsNeeded = extra.killShotsNeeded ?? null;
+    if (defId in SIM_DEFAULT_SPEED_KT && simSpeedKt != null && killShotsNeeded == null) {
+      killShotsNeeded = 1 + Math.floor(Math.random() * 3);
+    }
     const ent = {
       id: extra.id || `e${Date.now().toString(36)}${seq++}`,
       defId, name: def.name, cat: def.cat,
       aff: extra.aff || def.aff || 'friend',
       lat: latlng.lat, lng: latlng.lng,
-      heading: extra.heading ?? 0,
+      heading: heading ?? 0,
       callsign: extra.callsign || '',
       status: extra.status || 'ok',
       notes: extra.notes || '',
+      locked: !!extra.locked,
+      fireA: extra.fireA ?? null,   // มุมแนวยิงเริ่มต้น (องศา) — ใช้กับหน่วยที่ def.fireArc (เช่น มรกต)
+      fireB: extra.fireB ?? null,   // มุมแนวยิงสิ้นสุด (องศา)
+      fireRangeYd: extra.fireRangeYd ?? 7400,   // ระยะเส้นแนวยิง (หลา)
+      simSpeedKt,   // ความเร็ว (knot) — ถ้าไม่ null = อยู่ระหว่างจำลองการเคลื่อนที่ (hostilesim.js)
+      killShotsNeeded,          // จำนวนนัดที่ต้องยิงโดนถึงจะถูกทำลาย (สุ่ม 1-3 ตอนเริ่มจำลอง)
+      killShotsFired: extra.killShotsFired ?? 0,   // จำนวนนัดที่โดนแล้ว
       ts: extra.ts || Date.now(),
     };
     const m = L.marker([ent.lat, ent.lng], {
-      pane: 'entities', icon: iconFor(ent), draggable: true, autoPan: true, keyboard: false,
+      pane: 'entities', icon: iconFor(ent), draggable: !ent.locked, autoPan: true, keyboard: false,
     });
     m.on('click', L.DomEvent.stop).on('click', () => select(ent.id));
     m.on('dblclick', L.DomEvent.stop).on('dblclick', () => { select(ent.id); rename(ent.id); });
     m.on('dragstart', () => { WR.core.clearHighlight(); });
-    m.on('drag', e => { const p = e.target.getLatLng(); ent.lat = p.lat; ent.lng = p.lng; WR.ui && WR.ui.refreshProps(); WR.links && WR.links.recompute(); });
+    m.on('drag', e => { const p = e.target.getLatLng(); ent.lat = p.lat; ent.lng = p.lng; WR.ui && WR.ui.refreshProps(); WR.links && WR.links.recompute(); WR.hazard && WR.hazard.recompute(); });
     m.on('dragend', () => { touch('move', ent); });
     m.bindTooltip(() => tipHtml(ent), { direction: 'right', offset: [12, 0], opacity: 1, sticky: true, className: 'ent-tip' });
     m.addTo(groups[ent.cat]);
-    if (hiddenTypes.has(ent.defId)) groups[ent.cat].removeLayer(m);
+    if (hiddenTypes.has(ent.defId) || (modeAllow && !modeAllow.has(ent.defId))) groups[ent.cat].removeLayer(m);
     items.set(ent.id, { ent, m });
     if (!extra.silent) { record('add', ent); emit('change'); }
     return ent;
   }
 
-  // เนื้อหา tooltip เวลาเอาเมาส์ชี้ไอคอนบนแผนที่
+  // เนื้อหา tooltip เวลาเอาเมาส์ชี้ไอคอนบนแผนที่ — ชื่อ/MGRS/Radial-DME/สถานะ (ทั้งสองโหมด, คำนวณสดทุกครั้ง)
   function tipHtml(ent) {
     const def = CAT_BY_ID[ent.defId] || {};
-    const cell = WR.core.cellAt(L.latLng(ent.lat, ent.lng));
+    const ll = L.latLng(ent.lat, ent.lng);
+    const mgrs = WR.core.fmtMGRS(ll);
+    const rdme = WR.afdz ? WR.afdz.radialDme(ent.lat, ent.lng) : '';
     const row = (k, v) => `<span class="tl">${k}</span><span>${escapeHtml(v)}</span>`;
     return `<div class="ent-tip-name">${escapeHtml(ent.callsign || def.name || '')}</div>`
       + `<div class="ent-tip-grid">`
-      + row('ชนิด', def.name || '—')
-      + row('ช่อง', cell ? cell.full : 'นอกกรอบกริด')
-      + row('ฝ่าย', AFF_TH[ent.aff] || ent.aff || '—')
+      + row('MGRS', mgrs || '—')
+      + row('Radial/DME', rdme || '—')
       + row('สถานะ', ST_TH[ent.status] || ent.status || '—')
       + `</div>`;
   }
@@ -4935,10 +5394,23 @@ window.WR_GRAPHICS = [
 
   function update(id, patch) {
     const it = items.get(id); if (!it) return;
+    // อากาศยานจำลอง (FIGHTER/HELICOPTER/DRONE) ถูกทำลาย → เปลี่ยนไอคอนเป็น "อากาศยานตก" เสมอ
+    if (patch.status === 'dead' && patch.status !== it.ent.status && (it.ent.defId in SIM_DEFAULT_SPEED_KT)) {
+      const crashDef = CAT_BY_ID.crash;
+      if (crashDef) patch = Object.assign({}, patch, { defId: 'crash', name: crashDef.name, cat: crashDef.cat });
+    }
     Object.assign(it.ent, patch);
     if (patch.lat != null || patch.lng != null) it.m.setLatLng([it.ent.lat, it.ent.lng]);
+    if (patch.locked != null && it.m.dragging) patch.locked ? it.m.dragging.disable() : it.m.dragging.enable();
     redraw(id);
     touch('edit', it.ent);
+  }
+
+  // ย้ายตำแหน่งแบบเบา ๆ ไม่บันทึกปูม/ไม่ trigger syncAll — ใช้กับการจำลองเคลื่อนที่ต่อเนื่อง (hostilesim.js)
+  function moveSilent(id, lat, lng) {
+    const it = items.get(id); if (!it) return;
+    it.ent.lat = lat; it.ent.lng = lng;
+    it.m.setLatLng([lat, lng]);
   }
 
   function remove(id) {
@@ -5010,6 +5482,17 @@ window.WR_GRAPHICS = [
   }
   const isTypeHidden = defId => hiddenTypes.has(defId);
   function showAllTypes() { [...hiddenTypes].forEach(d => setTypeVisible(d, true)); }
+
+  /* ---------- ข้อจำกัดชนิดไอคอนตามโหมดแผนที่ (เช่น สปภอ. ใช้ได้แค่บางชนิด) ---------- */
+  function setModeAllowlist(ids) {
+    modeAllow = ids && ids.length ? new Set(ids) : null;
+    items.forEach(({ ent, m }) => {
+      const g = groups[ent.cat];
+      const show = (!modeAllow || modeAllow.has(ent.defId)) && !hiddenTypes.has(ent.defId);
+      if (show && !g.hasLayer(m)) g.addLayer(m);
+      else if (!show && g.hasLayer(m)) g.removeLayer(m);
+    });
+  }
   // สรุปจำนวนหน่วยแยกตามชนิด (เรียงตามลำดับใน WR_CATALOG) — ใช้สร้างแท็กกรอง
   function typesInUse() {
     const cnt = new Map();
@@ -5039,9 +5522,9 @@ window.WR_GRAPHICS = [
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
   WR.entities = {
-    init, add, remove, update, select, rename, rotate, redraw, redrawAll, iconSize,
+    init, add, remove, update, moveSilent, select, rename, rotate, redraw, redrawAll, iconSize,
     arm, disarm, isArmed, setCatVisible, isCatVisible, countByCat,
-    setTypeVisible, isTypeHidden, showAllTypes, typesInUse,
+    setTypeVisible, isTypeHidden, showAllTypes, typesInUse, setModeAllowlist,
     serialize, load, clearAll, get, selected, all, on,
     catDef: id => CAT_BY_ID[id],
   };
@@ -5074,8 +5557,16 @@ window.WR_GRAPHICS = [
         เส้น "ทึบ (ไม่ประ) สีส้ม"  · แบริ่ง วัดจาก สามยอด → ไปยัง ผู้ต้องสงสัย
         ความสำคัญ/เร่งด่วน "ต่ำสุด" — เส้นบาง จาง วาดใต้เส้นอื่น
 
-   • ป้ายกลางเส้น: ระยะทาง (กม.) + แบริ่ง° + ทิศ 16 จุด  เอียงตามแนวเส้น
-     (ไม่กลับหัว) และเลื่อนออกข้างเส้นไม่ให้เส้นทับตัวอักษร
+     ⑤ (2026-09-13) "EOD"  →  "วัตถุต้องสงสัย/วัตถุระเบิด" หรือ "อากาศยานตก" ใกล้สุด ไม่เกิน ๒ ไอคอนต่อ EOD ๑ ตัว
+        เส้นประ "สีม่วง" · แบริ่ง วัดจาก EOD → ไปยัง เป้าหมาย · ข้ามฝ่ายที่ "ถูกทำลาย"
+
+     ⑥ (2026-09-13) "วัตถุต้องสงสัย/วัตถุระเบิด" หรือ "อากาศยานตก"  →  หน่วยที่ใกล้สุด "๑ หน่วย"
+        เลือกจาก สายลม / สามยอด / พิราบ เท่านั้น (ไม่ใช่หน่วยตอบโต้ทั้งหมด)
+        เส้นประ "สีฟ้าอมเขียว (cyan)" · แบริ่ง วัดจาก หน่วย → ไปยัง เป้าหมาย · ข้ามฝ่ายที่ "ถูกทำลาย"
+
+   • ป้ายกลางเส้น: ระยะทาง (กม.) + แบริ่ง° + ทิศ 16 จุด  เอียงตามแนวเส้น (ไม่กลับหัว)
+     วางคร่อมกึ่งกลางเส้นเป๊ะ · พื้นชิปทึบ 100% + อยู่ pane บน (linkLabels z=471) จึงบังเส้นสนิท
+   • สไลเดอร์ "ความทึบเส้นเชื่อมความสัมพันธ์" ในแผงเลเยอร์ (WR.links.setOpacity, จำ wr_links_op)
    • คำนวณใหม่ทุกครั้งที่ไอคอนถูกเพิ่ม/ลบ/ย้าย/แก้ไข(รวมเปลี่ยนสถานะ) · เปิด/ปิดได้
    • ไม่บันทึกลงไฟล์สถานการณ์ (เป็นผลลัพธ์ที่คำนวณสด)
    ========================================================================= */
@@ -5095,7 +5586,7 @@ window.WR_GRAPHICS = [
   //   solid       : เส้นทึบ (ไม่ประ) | minor : ความสำคัญต่ำ — เส้นบางลง จางลง
   //   memberCap N : หลังเลือกครบทุก anchor แล้ว — member 1 ตัวคงเส้นได้ไม่เกิน N (เลือก N ที่ใกล้สุด)
   //                 ส่วนที่เกินถูกตัดทิ้ง ไม่ backfill
-  const BLUE = '#3b82f6', BLUE_HOT = '#38bdf8', YELLOW = '#eab308', ORANGE = '#f97316';
+  const BLUE = '#3b82f6', BLUE_HOT = '#38bdf8', YELLOW = '#eab308', ORANGE = '#f97316', PURPLE = '#a855f7', CYAN = '#06b6d4';
   const RULES = [
     // ③④ วาดก่อน (อยู่ใต้เส้นอื่น) — ความสำคัญต่ำสุด
     {
@@ -5125,6 +5616,20 @@ window.WR_GRAPHICS = [
       styleFor: m => m.status === 'dead'
         ? { color: BLUE_HOT, cls: ' bright', urgent: true }
         : { color: BLUE, cls: ' blue' },
+    },
+    {
+      // ⑤ EOD → วัตถุต้องสงสัย/วัตถุระเบิด หรือ อากาศยานตก ใกล้สุด ไม่เกิน 2 ตัวต่อ EOD 1 ตัว
+      anchorId: 'eod', memberIds: ['danger-bomb', 'crash'], max: 2, bearingFrom: 'anchor',
+      color: PURPLE, cls: ' purple',
+      anchorFilter: e => e.status !== 'dead',
+      filter: e => e.status !== 'dead',
+    },
+    {
+      // ⑥ วัตถุต้องสงสัย/วัตถุระเบิด หรือ อากาศยานตก → หน่วยใกล้สุด 1 หน่วย จากสายลม/สามยอด/พิราบเท่านั้น
+      anchorIds: ['danger-bomb', 'crash'], memberIds: ['sailom', 'sam-yot', 'pirab'], max: 1, bearingFrom: 'member',
+      color: CYAN, cls: ' cyan',
+      anchorFilter: e => e.status !== 'dead',
+      filter: e => e.status !== 'dead',
     },
   ];
 
@@ -5290,6 +5795,312 @@ window.WR_GRAPHICS = [
     isVisible: () => visible,
     getOpacity: () => opacity,
     count: () => linkCount,
+  };
+})();
+
+</script>
+<script>
+/* =========================================================================
+   hazard.js — วงรัศมีอันตราย 100 ม. รอบไอคอน "วัตถุต้องสงสัย/วัตถุระเบิด"
+               และ "อากาศยานตก" (เส้นขอบสีแดงเรืองแสง โดดเด่น, คำนวณสด)
+   ========================================================================= */
+(function () {
+  const WR = (window.WR = window.WR || {});
+  const RADIUS_M = 100;
+  const HAZARD_IDS = ['danger-bomb', 'crash'];
+
+  let map, group, ready = false;
+
+  function init() {
+    map = WR.core.map;
+    if (!map.getPane('hazard')) {
+      map.createPane('hazard');
+      map.getPane('hazard').style.zIndex = 495;   // ใต้ไอคอนหน่วย (500) เหนือกราฟิก/กริด
+      map.getPane('hazard').style.pointerEvents = 'none';
+    }
+    group = L.layerGroup([], { pane: 'hazard' }).addTo(map);
+    ready = true;
+    recompute();
+  }
+
+  function recompute() {
+    if (!ready || !group) return;
+    group.clearLayers();
+    const shown = e => {
+      if (WR.entities.isTypeHidden && WR.entities.isTypeHidden(e.defId)) return false;
+      const dd = WR.entities.catDef && WR.entities.catDef(e.defId);
+      if (dd && WR.entities.isCatVisible && !WR.entities.isCatVisible(dd.cat)) return false;
+      return true;
+    };
+    WR.entities.all()
+      .filter(e => HAZARD_IDS.indexOf(e.defId) !== -1 && shown(e))
+      .forEach(e => {
+        L.circle([e.lat, e.lng], {
+          pane: 'hazard', radius: RADIUS_M, className: 'hazard-ring',
+          color: '#ef4444', weight: 2.5, opacity: 1,
+          fill: true, fillColor: '#ef4444', fillOpacity: 0.08,
+          interactive: false,
+        }).addTo(group);
+      });
+  }
+
+  WR.hazard = { init, recompute };
+})();
+
+</script>
+<script>
+/* =========================================================================
+   firearc.js — เส้นแนวยิงของหน่วยที่ปรับทิศทางได้ (เช่น มรกต)
+   เส้นประสีเหลืองส้ม โปร่งใส 40% (opacity .6) — ไม่มีป้ายตัวเลขกำกับ (กันรกตา)
+   เส้นตรง 2 เส้นแยกกัน ตามมุม A (เริ่มต้น) และ B (สิ้นสุด) จากตำแหน่งหน่วย ยาวตาม fireRangeYd (หลา)
+   (ตำแหน่งหน่วยคงที่อยู่แล้ว — ปรับได้แค่มุม A/B/ระยะ ผ่านแผงคุณสมบัติ)
+   เปิด/ปิดทั้งเลเยอร์ได้จากแผงเลเยอร์ (จำสถานะใน localStorage)
+   ========================================================================= */
+(function () {
+  const WR = (window.WR = window.WR || {});
+  const YARD_M = 0.9144;
+  const R_EARTH = 6371000;
+  const LS_ON = 'wr_firearc_on';
+
+  let map, group, ready = false, visible = true;
+  try { const s = localStorage.getItem(LS_ON); if (s != null) visible = s === '1'; } catch (e) {}
+
+  function init() {
+    map = WR.core.map;
+    if (!map.getPane('fireArcs')) {
+      map.createPane('fireArcs');
+      map.getPane('fireArcs').style.zIndex = 496;   // ใต้ไอคอนหน่วย (500)
+      map.getPane('fireArcs').style.pointerEvents = 'none';
+    }
+    group = L.layerGroup([], { pane: 'fireArcs' }).addTo(map);
+    ready = true;
+    recompute();
+  }
+
+  function destPoint(lat, lng, bearingDeg, distM) {
+    const br = bearingDeg * Math.PI / 180;
+    const lat1 = lat * Math.PI / 180, lng1 = lng * Math.PI / 180;
+    const dR = distM / R_EARTH;
+    const lat2 = Math.asin(Math.sin(lat1) * Math.cos(dR) + Math.cos(lat1) * Math.sin(dR) * Math.cos(br));
+    const lng2 = lng1 + Math.atan2(Math.sin(br) * Math.sin(dR) * Math.cos(lat1), Math.cos(dR) - Math.sin(lat1) * Math.sin(lat2));
+    return [lat2 * 180 / Math.PI, lng2 * 180 / Math.PI];
+  }
+
+  function drawLine(ent, ang, rangeM) {
+    if (ang == null) return;
+    const d = destPoint(ent.lat, ent.lng, ang, rangeM);
+    L.polyline([[ent.lat, ent.lng], d], {
+      pane: 'fireArcs', color: '#f59e0b', weight: 2, opacity: 0.6, dashArray: '6 6', interactive: false,
+    }).addTo(group);
+  }
+
+  function recompute() {
+    if (!ready) return;
+    group.clearLayers();
+    if (!visible) return;
+    WR.entities.all().forEach(ent => {
+      if (ent.fireA == null && ent.fireB == null) return;
+      const rangeM = (ent.fireRangeYd || 7400) * YARD_M;
+      drawLine(ent, ent.fireA, rangeM);
+      drawLine(ent, ent.fireB, rangeM);
+    });
+  }
+
+  function setVisible(on) {
+    visible = !!on;
+    try { localStorage.setItem(LS_ON, visible ? '1' : '0'); } catch (e) {}
+    recompute();
+  }
+  function isVisible() { return visible; }
+
+  WR.firearc = { init, recompute, setVisible, isVisible };
+})();
+
+</script>
+<script>
+/* =========================================================================
+   hostilesim.js — จำลองเครื่องบินข้าศึกที่ตรวจพบ (สปภอ.)
+   สร้างไอคอน FIGHTER ฝ่ายข้าศึก ที่พิกัดจาก Radial/DME เทียบศูนย์สนามบิน
+   เคลื่อนที่ต่อเนื่องตามทิศทาง+ความเร็ว (knot) จริง ปรับเร่งเวลาได้ (1x/10x/20x/30x/40x)
+   เส้นติดตามสด (concept เดียวกับ links.js) — ระยะหน่วย NM ล้วน + ทิศทางแบบ Radial (ไม่มีทิศ 16 จุด):
+     • ค้างคาว → เครื่องบินข้าศึกทุกลำที่จำลองอยู่ (เห็นได้หมดทุกลำ)
+     • แต่ละเครื่องบินข้าศึก → นนทุกข์ที่ใกล้มันที่สุดเพียงตัวเดียว (กันหลายนนทุกข์ชี้เข้าลำเดียวกันจนรกตา)
+   หยุดเคลื่อนที่/หยุดติดตามเมื่อสถานะเป็น "ถูกทำลาย" (status === 'dead') หรือถูกลบทิ้ง
+   ========================================================================= */
+(function () {
+  const WR = (window.WR = window.WR || {});
+  const R_EARTH = 6371000;
+  const NM_M = 1852;
+  const TICK_MS = 1000;
+  const TRACK_COLOR = '#22c55e';
+
+  let map, trackGroup, trackLabelGroup, ready = false, mult = 1;
+  const lockHistory = {};   // hostileId -> [unitId, ...] เรียงตามลำดับที่เข้าระยะก่อน-หลัง (ตัวที่หลุดระยะถูกตัดออก)
+
+  function init() {
+    map = WR.core.map;
+    ['trackLines', 'trackLabels'].forEach((name, i) => {
+      if (!map.getPane(name)) {
+        map.createPane(name);
+        map.getPane(name).style.zIndex = 472 + i;   // เทียบเท่าชั้นเส้นเชื่อมความสัมพันธ์ (470/471)
+        map.getPane(name).style.pointerEvents = 'none';
+      }
+    });
+    trackGroup = L.layerGroup([], { pane: 'trackLines' }).addTo(map);
+    trackLabelGroup = L.layerGroup([], { pane: 'trackLabels' }).addTo(map);
+    ready = true;
+    setInterval(tick, TICK_MS);
+    recomputeTracks();
+  }
+
+  function destPoint(lat, lng, bearingDeg, distM) {
+    const br = bearingDeg * Math.PI / 180;
+    const lat1 = lat * Math.PI / 180, lng1 = lng * Math.PI / 180;
+    const dR = distM / R_EARTH;
+    const lat2 = Math.asin(Math.sin(lat1) * Math.cos(dR) + Math.cos(lat1) * Math.sin(dR) * Math.cos(br));
+    const lng2 = lng1 + Math.atan2(Math.sin(br) * Math.sin(dR) * Math.cos(lat1), Math.cos(dR) - Math.sin(lat1) * Math.sin(lat2));
+    return [lat2 * 180 / Math.PI, lng2 * 180 / Math.PI];
+  }
+  function bearing(aLat, aLng, bLat, bLng) {
+    const r = Math.PI / 180;
+    const y = Math.sin((bLng - aLng) * r) * Math.cos(bLat * r);
+    const x = Math.cos(aLat * r) * Math.sin(bLat * r) - Math.sin(aLat * r) * Math.cos(bLat * r) * Math.cos((bLng - aLng) * r);
+    return (Math.atan2(y, x) / r + 360) % 360;
+  }
+
+  /* ---------- สร้างเครื่องบินข้าศึกที่ตรวจพบ ---------- */
+  function createHostile({ lat, lng, heading, speedKt }) {
+    const ent = WR.entities.add('fighter', { lat, lng }, {
+      aff: 'hostile', heading: ((heading % 360) + 360) % 360, simSpeedKt: Math.max(1, +speedKt || 400),
+    });
+    recomputeTracks();
+    return ent;
+  }
+
+  /* ---------- เคลื่อนที่ต่อเนื่อง ---------- */
+  function tick() {
+    if (!ready) return;
+    let moved = false;
+    WR.entities.all().forEach(ent => {
+      if (ent.simSpeedKt == null || ent.status === 'dead') return;
+      const speedKt = ent.simSpeedKt * mult;
+      const distM = speedKt * NM_M / 3600 * (TICK_MS / 1000);
+      const d = destPoint(ent.lat, ent.lng, ent.heading || 0, distM);
+      WR.entities.moveSilent(ent.id, d[0], d[1]);
+      moved = true;
+    });
+    if (moved) { recomputeTracks(); WR.ui && WR.ui.refreshProps && WR.ui.refreshProps(); }
+  }
+
+  function setSpeedMultiplier(m) { mult = +m || 1; }
+  function getSpeedMultiplier() { return mult; }
+
+  /* ---------- เส้นติดตามสด ---------- */
+  function activeHostiles() {
+    return WR.entities.all().filter(e => e.simSpeedKt != null && e.status !== 'dead');
+  }
+  function nearestOf(lat, lng, list) {
+    let best = null, bestD = Infinity;
+    list.forEach(e => {
+      const d = map.distance([lat, lng], [e.lat, e.lng]);
+      if (d < bestD) { bestD = d; best = e; }
+    });
+    return best;
+  }
+
+  function drawTrack(ref, ent, locked) {
+    const a = L.latLng(ref.lat, ref.lng), b = L.latLng(ent.lat, ent.lng);
+    const color = locked ? '#ef4444' : TRACK_COLOR;
+    L.polyline([a, b], {
+      pane: 'trackLines', color, weight: locked ? 3 : 2, opacity: locked ? 1 : 0.85,
+      dashArray: locked ? null : '6 6', interactive: false,
+    }).addTo(trackGroup);
+
+    const pa = map.latLngToLayerPoint(a), pb = map.latLngToLayerPoint(b);
+    let rot = Math.atan2(pb.y - pa.y, pb.x - pa.x) * 180 / Math.PI;
+    if (rot > 90) rot -= 180; else if (rot < -90) rot += 180;
+    const mid = map.layerPointToLatLng(L.point((pa.x + pb.x) / 2, (pa.y + pb.y) / 2));
+    const nm = map.distance(a, b) / NM_M;
+    const brg = bearing(ref.lat, ref.lng, ent.lat, ent.lng);
+
+    L.marker(mid, {
+      pane: 'trackLabels', interactive: false,
+      icon: L.divIcon({
+        className: '', iconSize: [0, 0], iconAnchor: [0, 0],
+        html: `<div class="track-lbl${locked ? ' locked' : ''}" style="transform:translate(-50%,-50%) rotate(${rot.toFixed(1)}deg)">`
+            + `${locked ? 'LOCK ' : ''}R${String(Math.round(brg)).padStart(3, '0')}° / ${nm.toFixed(1)} NM</div>`,
+      }),
+    }).addTo(trackLabelGroup);
+  }
+
+  // หา PISTOL/ARROW ทุกตัวที่มีระยะครอบคลุมเครื่องบินลำนี้ (พื้นที่ทับซ้อนกันก็ล็อกเป้าพร้อมกันได้ทุกตัว)
+  function findLockUnits(h, defenders) {
+    return defenders.filter(u => {
+      const rKm = WR.seedRings && WR.seedRings.radiusKm(u.id);
+      if (rKm == null) return false;
+      return map.distance([u.lat, u.lng], [h.lat, h.lng]) <= rKm * 1000;
+    });
+  }
+  // จำลำดับหน่วยที่เข้าล็อกเป้าก่อน-หลัง (ตัวที่หลุดระยะไปแล้วถูกตัดออกจากลำดับ)
+  function updateLockHistory(hostileId, currentUnitIds) {
+    const hist = lockHistory[hostileId] || (lockHistory[hostileId] = []);
+    for (let i = hist.length - 1; i >= 0; i--) if (currentUnitIds.indexOf(hist[i]) === -1) hist.splice(i, 1);
+    currentUnitIds.forEach(id => { if (hist.indexOf(id) === -1) hist.push(id); });
+  }
+  // คืนลำดับหน่วยที่กำลังล็อกเป้าเครื่องบินลำนี้อยู่ตอนนี้ (เรียงตามลำดับเข้าระยะก่อน-หลัง)
+  function getLockOrder(hostileId) { return (lockHistory[hostileId] || []).slice(); }
+
+  // ยิง 1 นัดจากหน่วยที่เลือก — นับรวมกันไม่ว่าจะยิงจากหน่วยไหน ครบตามจำนวนสุ่มไว้ (killShotsNeeded) แล้วถูกทำลาย
+  function fireAt(hostileId, unitId) {
+    const h = WR.entities.get(hostileId);
+    if (!h || h.status === 'dead' || h.simSpeedKt == null) return null;
+    const fired = (h.killShotsFired || 0) + 1;
+    const needed = h.killShotsNeeded || 1;
+    const destroyed = fired >= needed;
+    WR.entities.update(hostileId, destroyed ? { killShotsFired: fired, status: 'dead' } : { killShotsFired: fired });
+    return { fired, needed, destroyed, unitId };
+  }
+
+  function recomputeTracks() {
+    if (!ready) return;
+    trackGroup.clearLayers();
+    trackLabelGroup.clearLayers();
+    const hostiles = activeHostiles();
+
+    // วงรัศมี PISTOL/ARROW กระพริบแดงตัวไหน ที่มีเครื่องบินข้าศึกลำใดลำหนึ่งอยู่ในระยะ
+    const defenders = WR.entities.all().filter(e => (e.defId === 'pistol' || e.defId === 'arrow') && e.status !== 'dead');
+    if (WR.seedRings) {
+      defenders.forEach(u => {
+        const rKm = WR.seedRings.radiusKm(u.id);
+        if (rKm == null) return;
+        const inRange = hostiles.some(h => map.distance([u.lat, u.lng], [h.lat, h.lng]) <= rKm * 1000);
+        WR.seedRings.setAlert(u.id, inRange);
+      });
+    }
+
+    if (!hostiles.length) return;
+
+    // ค้างคาว → เครื่องบินข้าศึกทุกลำ (เห็นได้หมด ไม่จำกัดแค่ใกล้สุด — ไม่เปลี่ยนแม้ถูกล็อกเป้าแล้ว)
+    WR.entities.all().forEach(u => {
+      if (u.defId !== 'khangkhao' || u.status === 'dead') return;
+      hostiles.forEach(h => drawTrack(u, h));
+    });
+
+    // แต่ละเครื่องบินข้าศึก: PISTOL/ARROW ทุกตัวที่เข้าระยะครอบคลุมมัน → ล็อกเป้าพร้อมกันทั้งหมด (แทนนนทุกข์)
+    // ถ้ายังไม่เข้าระยะใครเลย → นนทุกข์ที่ใกล้มันที่สุดติดตามตามปกติ
+    const nonthuks = WR.entities.all().filter(e => e.defId === 'nonthuk' && e.status !== 'dead');
+    hostiles.forEach(h => {
+      const lockUnits = findLockUnits(h, defenders);
+      updateLockHistory(h.id, lockUnits.map(u => u.id));
+      if (lockUnits.length) { lockUnits.forEach(u => drawTrack(u, h, true)); return; }
+      const nearest = nearestOf(h.lat, h.lng, nonthuks);
+      if (nearest) drawTrack(nearest, h);
+    });
+  }
+
+  WR.hostileSim = {
+    init, createHostile, setSpeedMultiplier, getSpeedMultiplier, recomputeTracks,
+    getLockOrder, fireAt,
   };
 })();
 
@@ -6003,13 +6814,140 @@ window.WR_GRAPHICS = [
     if (gp) gp.style.display = on ? '' : 'none';
   }
 
+  /* ---------- โหมดแผนที่: สปฐบ. (ป้องกันที่ตั้งภาคพื้น) / สปภอ. (ป้องกันภัยทางอากาศ) ---------- */
+  // pane ที่เป็นของสปฐบ. ล้วน ๆ (ซ่อนทั้งก้อนตอนสลับไปสปภอ.) — 'entities' ไม่รวมในนี้
+  // เพราะ สปภอ. ยังใช้ไอคอนบางชนิดได้ (กรองทีละไอคอนด้วย setModeAllowlist แทน)
+  const GROUND_PANES = ['gridPane', 'labels', 'graphics', 'measure', 'areas', 'links', 'linkLabels', 'hazard'];
+  // pane ที่เป็นของสปภอ. ล้วน ๆ (ตรงข้าม GROUND_PANES — แสดงเฉพาะโหมดสปภอ.) เช่น วงรัศมี PISTOL 1-3
+  const AIR_PANES = ['seedRings', 'fireArcs', 'trackLines', 'trackLabels'];
+  // ไอคอนที่อนุญาตให้ใช้ในโหมด สปภอ. (ผู้ใช้ระบุ 2026-09-13, เพิ่มอากาศยาน/เป้าหมายอากาศ 2026-09-13)
+  const AFDZ_ALLOWED_IDS = ['phra-ram', 'phiphek', 'krathing', 'kasorn', 'phali', 'nonthuk', 'morakot', 'pistol', 'arrow', 'khangkhao',
+    'fighter', 'helicopter', 'drone', 'crash'];
+  // ไอคอนที่ปิดใช้งานในโหมด สปฐบ. — กลายเป็นไอคอนเฉพาะภาพสปภอ. เท่านั้น (ผู้ใช้ระบุ 2026-09-13)
+  const GROUND_BLOCKED_IDS = ['phra-ram', 'nonthuk', 'khangkhao', 'phiphek', 'phali', 'morakot', 'pistol', 'arrow'];
+  const GROUND_ALLOWED_IDS = window.WR_CATALOG.map(d => d.id).filter(id => GROUND_BLOCKED_IDS.indexOf(id) === -1);
+  let mapMode = 'ground';
+  function applyMapMode() {
+    const map = WR.core.map;
+    GROUND_PANES.forEach(p => { const pn = map.getPane(p); if (pn) pn.style.display = mapMode === 'ground' ? '' : 'none'; });
+    AIR_PANES.forEach(p => { const pn = map.getPane(p); if (pn) pn.style.display = mapMode === 'air' ? '' : 'none'; });
+    WR.entities.setModeAllowlist(mapMode === 'air' ? AFDZ_ALLOWED_IDS : GROUND_ALLOWED_IDS);
+    WR.afdz && WR.afdz.setVisible(mapMode === 'air');
+    WR.core.setViewMode(mapMode);
+    $('#t-mode-ground').classList.toggle('on', mapMode === 'ground');
+    $('#t-mode-air').classList.toggle('on', mapMode === 'air');
+    const hd = $('#hostile-detect'); if (hd) hd.style.display = mapMode === 'air' ? '' : 'none';
+    try { localStorage.setItem('wr_map_mode', mapMode); } catch (e) {}
+    renderHostileFire();
+    renderCrashReadout();
+    applyPaletteFilter();
+    buildLayers();
+  }
+  function setMapMode(m) {
+    if (m !== 'ground' && m !== 'air') return;
+    if (m === mapMode) return;
+    mapMode = m;
+    applyMapMode();
+  }
+
   /* =================== BUILD =================== */
   function build() {
     buildPalette(); buildTools(); buildLayers(); buildProps(null);
-    buildIncidents(); wireTopbar(); wireShortcuts(); wirePanelToggles(); wireLayerFilter(); startClock(); renderLog();
+    buildIncidents(); wireTopbar(); wireShortcuts(); wirePanelToggles(); wireLayerFilter(); wireCoordSearch(); wireHostileDetect(); wireCrashReadout(); startClock(); renderLog();
     // sections collapsible
     document.querySelectorAll('.sect > h3').forEach(h => h.addEventListener('click', () => h.parentElement.classList.toggle('collapsed')));
+    try { mapMode = localStorage.getItem('wr_map_mode') === 'air' ? 'air' : 'ground'; } catch (e) {}
+    applyMapMode();
     syncAll();
+  }
+
+  /* ---------- ช่องค้นหาพิกัด (รับได้ทั้ง DDM / MGRS / ทศนิยม) ---------- */
+  // DDM เช่น 14°52.462'N 100°39.487'E — รับได้ไม่ว่าจะเรียงพิกัดไหนก่อน มีสัญลักษณ์องศา/ลิปดาหรือไม่ก็ได้
+  function parseDDM(text) {
+    const re = /(\d{1,3}(?:\.\d+)?)\s*[°:]?\s*(\d{1,2}(?:\.\d+)?)?\s*['′]?\s*([NSEWnsew])/g;
+    let m, lat = null, lng = null;
+    while ((m = re.exec(text))) {
+      const deg = parseFloat(m[1]), min = m[2] ? parseFloat(m[2]) : 0;
+      const val = deg + min / 60, dir = m[3].toUpperCase();
+      if (dir === 'N') lat = val; else if (dir === 'S') lat = -val;
+      else if (dir === 'E') lng = val; else if (dir === 'W') lng = -val;
+    }
+    return (lat != null && lng != null) ? { lat, lng } : null;
+  }
+  // ทศนิยมล้วน "14.874667, 100.663333"
+  function parseDecimalLL(text) {
+    const m = text.match(/^(-?\d{1,3}(?:\.\d+)?)\s*[,\s]\s*(-?\d{1,3}(?:\.\d+)?)$/);
+    if (!m) return null;
+    const lat = parseFloat(m[1]), lng = parseFloat(m[2]);
+    return (Math.abs(lat) <= 90 && Math.abs(lng) <= 180) ? { lat, lng } : null;
+  }
+  // MGRS เช่น "PS746405" (ย่อ ไม่มีโซน/แถบ — เติม 47P ให้อัตโนมัติ) หรือเต็ม "47PPS746405"
+  function parseMGRSInput(text) {
+    const t = text.replace(/\s+/g, '').toUpperCase();
+    const m = t.match(/^(\d{1,2}[A-Z])?([A-Z]{2})(\d+)$/);
+    if (!m || m[3].length % 2 !== 0 || m[3].length > 10 || m[3].length < 2) return null;
+    try {
+      const ll = window.mgrs.toPoint((m[1] || '47P') + m[2] + m[3]);   // [lng, lat]
+      return { lat: ll[1], lng: ll[0] };
+    } catch (e) { return null; }
+  }
+  function parseCoordInput(text) {
+    const t = (text || '').trim();
+    if (!t) return null;
+    return parseDDM(t) || parseDecimalLL(t) || parseMGRSInput(t);
+  }
+  function wireCoordSearch() {
+    const inp = $('#coord-search-input'), btn = $('#coord-search-go');
+    if (!inp || !btn) return;
+    const go = () => {
+      const p = parseCoordInput(inp.value);
+      inp.classList.toggle('err', !p && !!inp.value.trim());
+      if (!p) { if (inp.value.trim()) toast('รูปแบบพิกัดไม่ถูกต้อง — พิมพ์ DDM เช่น 14°52.462′N 100°39.487′E หรือ MGRS เช่น PS746405'); return; }
+      const map = WR.core.map;
+      map.setView([p.lat, p.lng], Math.max(map.getZoom(), 15), { animate: false });
+      const pin = L.marker([p.lat, p.lng], {
+        interactive: false, pane: 'measure',
+        icon: L.divIcon({ className: '', iconSize: [22, 22], iconAnchor: [11, 11], html: '<div class="coord-search-pin"></div>' }),
+      }).addTo(map);
+      setTimeout(() => map.removeLayer(pin), 3500);
+      toast('ไปยัง ' + WR.core.fmtLatLng(L.latLng(p.lat, p.lng)) + '  (' + WR.core.fmtMGRS(L.latLng(p.lat, p.lng)) + ')');
+    };
+    btn.addEventListener('click', go);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    inp.addEventListener('input', () => inp.classList.remove('err'));
+  }
+
+  /* ---------- ฟอร์มแจ้งพบเครื่องบินข้าศึก (สปภอ.) — Radial/DME + ทิศบิน + ความเร็ว ---------- */
+  function wireHostileDetect() {
+    const rIn = $('#hd-radial'), dIn = $('#hd-dme'), hIn = $('#hd-heading'), sIn = $('#hd-speed'), btn = $('#hd-submit');
+    if (!rIn || !btn) return;
+    // พับ/ขยายแผงแจ้งพบ (กันบังแผนที่) — จำสถานะไว้
+    const panel = $('#hostile-detect'), head = $('#hd-head');
+    try { if (localStorage.getItem('wr_hd_collapsed') === '1') panel.classList.add('collapsed'); } catch (e) {}
+    head.addEventListener('click', () => {
+      const on = panel.classList.toggle('collapsed');
+      try { localStorage.setItem('wr_hd_collapsed', on ? '1' : '0'); } catch (e) {}
+    });
+    // ทิศบินเข้าหาศูนย์สนามบิน = ค่าตรงข้ามของ Radial (auto-fill แต่แก้ไขได้)
+    rIn.addEventListener('input', () => {
+      const r = parseFloat(rIn.value);
+      if (!isNaN(r)) hIn.value = Math.round(((r + 180) % 360 + 360) % 360);
+    });
+    btn.addEventListener('click', () => {
+      const r = parseFloat(rIn.value), d = parseFloat(dIn.value);
+      if (isNaN(r) || r < 0 || r > 359 || isNaN(d) || d <= 0) {
+        toast('กรอก Radial (0-359°) และ DME (มากกว่า 0) ให้ครบก่อน'); return;
+      }
+      const hdgRaw = parseFloat(hIn.value);
+      const hdg = isNaN(hdgRaw) ? Math.round((r + 180) % 360) : ((Math.round(hdgRaw) % 360 + 360) % 360);
+      const spd = parseFloat(sIn.value) || 400;
+      const p = WR.afdz.fromRadialDme(r, d);
+      const ent = WR.hostileSim.createHostile({ lat: p.lat, lng: p.lng, heading: hdg, speedKt: spd });
+      if (ent) {
+        WR.entities.select(ent.id);
+        toast(`แจ้งพบเครื่องบินข้าศึกที่ R${String(Math.round(r)).padStart(3, '0')}°/${d.toFixed(1)} DME แล้ว`);
+      }
+    });
   }
 
   /* ---------- ปุ่มกรองเลเยอร์บนแผนที่ (เปิด/ปิดกลุ่มไอคอน) ---------- */
@@ -6023,7 +6961,6 @@ window.WR_GRAPHICS = [
   function buildLayerFilter() {
     const menu = $('#lf-menu'), btn = $('#lf-toggle');
     if (!menu) return;
-    const counts = WR.entities.countByCat();
     menu.innerHTML = '';
     const mkRow = (label, on, cb, count, dot) => {
       const r = el('div', 'lf-row' + (on ? '' : ' off'));
@@ -6034,14 +6971,15 @@ window.WR_GRAPHICS = [
       r.addEventListener('click', () => { cb(!on); syncAll(); });
       return r;
     };
-    WR_CATS.forEach(c => menu.appendChild(
-      mkRow(c.name, WR.entities.isCatVisible(c.key), v => WR.entities.setCatVisible(c.key, v), counts[c.key], CAT_COLOR[c.key])));
+    // แยกทีละชนิดไอคอน (ไม่ใช่กลุ่มใหญ่ cmd/ops/other อีกต่อไป — ปิดทีละกลุ่มไม่ค่อยมีประโยชน์)
+    WR.entities.typesInUse().forEach(t => menu.appendChild(
+      mkRow(t.name, !t.hidden, on => WR.entities.setTypeVisible(t.defId, on), t.count, CAT_COLOR[t.cat])));
     menu.appendChild(mkRow('กราฟิกยุทธการ', graphicsOn, v => setGraphicsOn(v), WR.draw.count()));
     if (WR.areas && WR.areas.count())
       menu.appendChild(mkRow('ขอบเขตพื้นที่', WR.areas.isVisible(), v => WR.areas.setVisible(v), WR.areas.count()));
     if (WR.links)
       menu.appendChild(mkRow('เส้นเชื่อมความสัมพันธ์', WR.links.isVisible(), v => WR.links.setVisible(v), WR.links.count(), '#ef4444'));
-    const anyOff = WR_CATS.some(c => !WR.entities.isCatVisible(c.key)) || !graphicsOn
+    const anyOff = WR.entities.typesInUse().some(t => t.hidden) || !graphicsOn
       || (WR.areas && WR.areas.count() && !WR.areas.isVisible())
       || (WR.links && !WR.links.isVisible());
     btn.classList.toggle('active', anyOff);
@@ -6070,17 +7008,23 @@ window.WR_GRAPHICS = [
       box.querySelector('.cat-h').addEventListener('click', () => box.classList.toggle('collapsed'));
       wrap.appendChild(box);
     });
-    search.addEventListener('input', () => {
-      const q = search.value.trim().toLowerCase();
-      wrap.querySelectorAll('.cat').forEach(box => {
-        let any = false;
-        box.querySelectorAll('.pal-item').forEach(it => {
-          const hit = !q || it.dataset.name.toLowerCase().includes(q);
-          it.style.display = hit ? '' : 'none'; if (hit) any = true;
-        });
-        box.style.display = any ? '' : 'none';
-        if (q) box.classList.remove('collapsed');
+    search.addEventListener('input', applyPaletteFilter);
+  }
+  // ซ่อน/แสดงไอคอนในจานสัญลักษณ์ตาม (1) คำค้นหา (2) โหมดแผนที่ปัจจุบัน (แต่ละโหมดใช้ไอคอนได้ไม่เหมือนกัน)
+  function applyPaletteFilter() {
+    const wrap = $('#palette'); if (!wrap) return;
+    const q = ($('#pal-search').value || '').trim().toLowerCase();
+    const allowed = mapMode === 'air' ? AFDZ_ALLOWED_IDS : GROUND_ALLOWED_IDS;
+    wrap.querySelectorAll('.cat').forEach(box => {
+      let any = false;
+      box.querySelectorAll('.pal-item').forEach(it => {
+        const hitSearch = !q || it.dataset.name.toLowerCase().includes(q);
+        const hitMode = allowed.includes(it.dataset.id);
+        const show = hitSearch && hitMode;
+        it.style.display = show ? '' : 'none'; if (show) any = true;
       });
+      box.style.display = any ? '' : 'none';
+      if (q && any) box.classList.remove('collapsed');
     });
   }
   function clearPaletteSel() { document.querySelectorAll('.pal-item.sel').forEach(x => x.classList.remove('sel')); }
@@ -6188,20 +7132,97 @@ window.WR_GRAPHICS = [
   let curKind = null; // 'entity' | 'graphic' | null
   function buildProps(target) {
     const box = $('#props'); box.innerHTML = '';
+    const isEnt = target && target._ent === undefined && target.defId;
     if (!target) {
       curKind = null;
       box.appendChild(el('div', 'empty-hint', 'เลือกสัญลักษณ์หรือกราฟิกบนแผนที่<br>เพื่อดู/แก้ไขรายละเอียด<br><br>หรือเลือกจากจานด้านซ้ายแล้วคลิกวางบนแผนที่'));
       return;
     }
-    if (target._ent === undefined && target.defId) return propsEntity(target);
+    if (isEnt) return propsEntity(target);
     if (target.kind) return propsGraphic(target);
+  }
+
+  /* ---------- แผงสั่งยิงเครื่องบินข้าศึกบนแผนที่ ---------- */
+  // โผล่อัตโนมัติทุกลำที่กำลังจำลองอยู่ (ฝ่ายข้าศึก) โดยไม่ต้องคลิกเลือกไอคอนก่อน — ประหยัดเวลาตามที่ผู้ใช้ขอ
+  function renderHostileFire() {
+    const panel = $('#hostile-fire'), list = $('#hf-list');
+    if (!panel || !list) return;
+    const hostiles = mapMode === 'air'
+      ? WR.entities.all().filter(e => e.aff === 'hostile' && e.simSpeedKt != null && e.killShotsNeeded != null && e.status !== 'dead')
+      : [];
+    if (!hostiles.length) { panel.hidden = true; list.innerHTML = ''; return; }
+    panel.hidden = false;
+    list.innerHTML = '';
+    hostiles.forEach(ent => {
+      const row = el('div', 'hf-row');
+      row.appendChild(el('div', 'hf-target', escapeHtml(ent.callsign || ent.name || 'เครื่องบินข้าศึก')));
+      const lockEnts = (WR.hostileSim ? WR.hostileSim.getLockOrder(ent.id) : [])
+        .map(id => WR.entities.get(id)).filter(Boolean);
+      const sel = el('select');
+      if (!lockEnts.length) {
+        const o = el('option', null, '— ยังไม่มีหน่วยล็อกเป้า —'); o.value = ''; sel.appendChild(o);
+        sel.disabled = true;
+      } else {
+        sel.disabled = false;
+        lockEnts.forEach((u, i) => {
+          const o = el('option', null, (u.callsign || u.name) + (i === 0 ? ' (เข้าระยะก่อน)' : ''));
+          o.value = u.id; sel.appendChild(o);
+        });
+      }
+      row.appendChild(sel);
+      const btn = el('button', null, `ยิง (โดนแล้ว ${ent.killShotsFired || 0}/${ent.killShotsNeeded} ครั้ง)`);
+      btn.disabled = !lockEnts.length;
+      btn.onclick = () => {
+        const res = WR.hostileSim.fireAt(ent.id, sel.value);
+        if (!res) return;
+        toast(res.destroyed ? 'ทำลายเครื่องบินข้าศึกสำเร็จ!' : `ยิงโดน — ${res.fired}/${res.needed} ครั้ง`);
+        renderHostileFire();
+      };
+      row.appendChild(btn);
+      list.appendChild(row);
+    });
+  }
+
+  /* ---------- กรอบพิกัดอากาศยานตก มุมล่างขวาของแผนที่เสมอ (มีทุกจุดที่เป็นไอคอน "อากาศยานตก") ---------- */
+  function renderCrashReadout() {
+    const box = $('#crash-readout'), body = $('#cr-body'); if (!box || !body) return;
+    const crashes = WR.entities.all().filter(e => e.defId === 'crash');
+    if (!crashes.length) { box.hidden = true; body.innerHTML = ''; return; }
+    box.hidden = false;
+    const collapsed = box.classList.contains('collapsed');
+    if (collapsed) {
+      body.innerHTML = crashes.map((e, i) => {
+        const name = escapeHtml(e.callsign || ('อากาศยานตก ' + (i + 1)));
+        const rd = (mapMode === 'air' && WR.afdz) ? WR.afdz.radialDme(e.lat, e.lng) : '';
+        return `<div class="cr-compact">${name}${rd ? ' — ' + rd : ''}</div>`;
+      }).join('');
+    } else {
+      body.innerHTML = crashes.map((e, i) => {
+        const ll = L.latLng(e.lat, e.lng);
+        const cell = WR.core.cellAt(ll);
+        let html = `<div class="crash-name">${escapeHtml(e.callsign || ('อากาศยานตก ' + (i + 1)))}</div>`
+          + `<div><span class="k">ช่อง </span><span class="cell">${cell ? cell.full : '— นอกกรอบ —'}</span></div>`
+          + `<div><span class="k">MGRS </span>${WR.core.fmtMGRS(ll)}</div>`;
+        if (mapMode === 'air' && WR.afdz) html += `<div><span class="k">Radial/DME </span>${WR.afdz.radialDme(e.lat, e.lng)}</div>`;
+        return html;
+      }).join('<hr style="border:0;border-top:1px solid var(--line-soft);margin:4px 0">');
+    }
+  }
+  function wireCrashReadout() {
+    const box = $('#crash-readout'), head = $('#cr-head'); if (!box || !head) return;
+    try { if (localStorage.getItem('wr_cr_collapsed') === '1') box.classList.add('collapsed'); } catch (e) {}
+    head.addEventListener('click', () => {
+      const on = box.classList.toggle('collapsed');
+      try { localStorage.setItem('wr_cr_collapsed', on ? '1' : '0'); } catch (e) {}
+      renderCrashReadout();
+    });
   }
 
   function affPick(cur, onPick) {
     const w = el('div', 'aff-pick');
     AFFS.forEach(a => {
-      const b = el('button', cur === a ? 'on' : '', AFF_TH[a]);
-      b.dataset.a = a;
+      const b = el('button', cur === a ? 'on' : '');
+      b.dataset.a = a; b.title = AFF_TH[a];
       b.addEventListener('click', () => { w.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); onPick(a); });
       w.appendChild(b);
     });
@@ -6214,28 +7235,32 @@ window.WR_GRAPHICS = [
     curKind = 'entity';
     const box = $('#props'); box.innerHTML = '';
     const def = WR.entities.catDef(ent.defId);
-    box.appendChild(el('div', 'field', `<label>ชนิด</label><div style="font-weight:600">${def.name}</div>`));
     const cell = WR.core.cellAt(L.latLng(ent.lat, ent.lng));
-    box.appendChild(el('div', 'field', `<label>ตำแหน่ง (ช่องกริด)</label><div style="font-family:var(--mono);color:var(--grid-label);font-weight:700">${cell ? cell.full : 'นอกกรอบกริด'}</div>`));
+    const topRow = el('div', 'row2');
+    topRow.appendChild(el('div', 'field', `<label>ชนิด</label><div style="font-weight:600">${def.name}</div>`));
+    topRow.appendChild(el('div', 'field', `<label>ตำแหน่ง</label><div style="font-family:var(--mono);color:var(--grid-label);font-weight:700;font-size:12px">${cell ? cell.full : 'นอกกรอบกริด'}</div>`));
+    box.appendChild(topRow);
     const nameInput = input(ent.callsign, v => WR.entities.update(ent.id, { callsign: v }),
       { placeholder: def.name });
     const nameWrap = el('div', 'field');
-    nameWrap.appendChild(el('label', null, 'ชื่อ / ป้ายกำกับ (แสดงเหนือไอคอน)'));
+    nameWrap.appendChild(el('label', null, 'ชื่อ / ป้ายกำกับ'));
     const nameRow = el('div', null); nameRow.style.cssText = 'display:flex;gap:6px;align-items:stretch';
     nameInput.style.flex = '1'; nameInput.style.minWidth = '0';
+    nameInput.title = 'เว้นว่าง = ใช้ชื่อไอคอน • ดับเบิลคลิกไอคอนบนแผนที่เพื่อแก้ชื่อได้';
     const resetName = el('button', 'btn', '↺');
     resetName.title = 'ใช้ชื่อจากไอคอน (' + def.name + ')';
     resetName.style.cssText = 'flex:0 0 auto;width:auto;padding:0 10px';
     resetName.onclick = () => { WR.entities.update(ent.id, { callsign: def.name }); refreshProps(); };
     nameRow.append(nameInput, resetName);
     nameWrap.appendChild(nameRow);
-    nameWrap.appendChild(el('div', null, '<span style="color:var(--text-2);font-size:11px">ดับเบิลคลิกที่ไอคอนบนแผนที่เพื่อแก้ชื่อได้ • เว้นว่าง = ใช้ชื่อไอคอน</span>'));
     box.appendChild(nameWrap);
-    box.appendChild(field('ฝ่าย', affPick(ent.aff, a => { WR.entities.update(ent.id, { aff: a }); })));
+    const affRow = el('div', 'row2');
+    affRow.appendChild(field('ฝ่าย', affPick(ent.aff, a => { WR.entities.update(ent.id, { aff: a }); })));
     const st = el('select');
     [['ok', 'ปกติ'], ['dmg', 'เสียหาย'], ['dead', 'ถูกทำลาย']].forEach(([v, t]) => { const o = el('option', null, t); o.value = v; if (ent.status === v) o.selected = true; st.appendChild(o); });
     st.addEventListener('change', () => WR.entities.update(ent.id, { status: st.value }));
-    box.appendChild(field('สถานะ', st));
+    affRow.appendChild(field('สถานะ', st));
+    box.appendChild(affRow);
     if (def.rot) {
       const row = el('div', 'row2');
       const h = input(ent.heading, v => WR.entities.update(ent.id, { heading: (+v % 360 + 360) % 360 }), { type: 'number', min: 0, max: 359 });
@@ -6245,6 +7270,35 @@ window.WR_GRAPHICS = [
       m.onclick = () => WR.entities.rotate(ent.id, -15); p.onclick = () => WR.entities.rotate(ent.id, 15);
       bb.append(m, p); row.appendChild(field('หมุน', bb));
       box.appendChild(row);
+    }
+    if (def.fireArc) {
+      const row2 = el('div', 'row2');
+      const mkAngle = (label, key) => {
+        const i = el('input'); i.type = 'number'; i.min = 0; i.max = 359; i.placeholder = '—';
+        i.value = ent[key] ?? '';
+        i.addEventListener('input', () => {
+          const v = i.value.trim();
+          WR.entities.update(ent.id, { [key]: v === '' ? null : ((+v % 360 + 360) % 360) });
+        });
+        return field(label, i);
+      };
+      row2.appendChild(mkAngle('แนวยิง A (เริ่มต้น)', 'fireA'));
+      row2.appendChild(mkAngle('แนวยิง B (สิ้นสุด)', 'fireB'));
+      box.appendChild(row2);
+      const rangeInput = input(ent.fireRangeYd ?? 7400,
+        v => WR.entities.update(ent.id, { fireRangeYd: Math.max(1, +v || 7400) }), { type: 'number', min: 1 });
+      box.appendChild(field('ระยะแนวยิง (หลา)', rangeInput));
+      box.appendChild(el('div', null, '<span style="color:var(--text-2);font-size:11px">เว้นว่างมุม A หรือ B = ไม่แสดงเส้นนั้น</span>'));
+      const fdef = WR.fireArcDefaults && WR.fireArcDefaults[ent.id];
+      if (fdef) {
+        const qd = el('button', 'btn', 'ค่าเริ่มต้น (Quick Default)');
+        qd.style.marginTop = '6px';
+        qd.onclick = () => {
+          WR.entities.update(ent.id, { fireA: fdef.fireA, fireB: fdef.fireB, fireRangeYd: fdef.fireRangeYd });
+          refreshProps();
+        };
+        box.appendChild(qd);
+      }
     }
     const ta = el('textarea'); ta.value = ent.notes || ''; ta.addEventListener('input', () => WR.entities.update(ent.id, { notes: ta.value }));
     box.appendChild(field('หมายเหตุ', ta));
@@ -6275,6 +7329,7 @@ window.WR_GRAPHICS = [
     box.appendChild(del);
   }
   function refreshProps() {
+    renderHostileFire();
     if (curKind === 'entity') { const e = WR.entities.selected(); if (e) propsEntity(e); }
     else if (curKind === 'graphic') { const g = WR.draw.selected(); if (g) propsGraphic(g); }
   }
@@ -6286,14 +7341,8 @@ window.WR_GRAPHICS = [
     const bm = el('div', 'field');
     bm.appendChild(el('label', null, 'แผนที่ฐาน'));
     const sel = el('select');
-    [['none', 'ไม่มี (พื้นธีม)'],
-     ['gsat', 'ภาพถ่ายดาวเทียม Google *ออนไลน์'],
-     ['ghyb', 'Google ดาวเทียม+ป้ายชื่อ *ออนไลน์'],
-     ['esri', 'ภาพถ่ายดาวเทียม Esri *ออนไลน์'],
-     ['osm', 'ถนน (OSM) *ออนไลน์'],
-     ['topo', 'ภูมิประเทศ *ออนไลน์'],
-     ['image', 'ภาพผังที่นำเข้า'],
-     ['xyz', 'XYZ กำหนดเอง']]
+    [['gsat', 'ภาพถ่ายดาวเทียม Google *ออนไลน์'],
+     ['ghyb', 'Google ดาวเทียม+ป้ายชื่อ *ออนไลน์']]
       .forEach(([v, t]) => { const o = el('option', null, t); o.value = v; sel.appendChild(o); });
     sel.value = WR.state.basemap || 'none';
     sel.addEventListener('change', () => {
@@ -6310,6 +7359,53 @@ window.WR_GRAPHICS = [
     bi.onclick = () => $('#imp-img').click(); bk.onclick = () => $('#imp-kml').click();
     impRow.append(bi, bk); box.appendChild(impRow);
     box.appendChild(el('div', null, '<hr style="border:0;border-top:1px solid var(--line-soft);margin:8px 0">'));
+
+    if (mapMode === 'air') {
+      const hd = el('div', 'layer-subhead');
+      hd.appendChild(el('span', null, 'สปภอ. — วงแหวนป้องกันภัยทางอากาศ'));
+      box.appendChild(hd);
+      if (WR.afdz) {
+        WR.afdz.zones().forEach(z => {
+          if (z.noFill) return;
+          box.appendChild(sliderRow(`ความทึบ ${z.name}`, WR.afdz.getOpacity(z.id), v => WR.afdz.setOpacity(z.id, v)));
+        });
+        box.appendChild(el('div', null, '<div style="color:var(--text-2);font-size:11px;margin-top:2px">WARNING ZONE ไม่มีพื้นสี — เส้นขอบสีฟ้าเท่านั้น</div>'));
+      }
+      if (WR.seedRings && WR.seedRings.keys().length) {
+        box.appendChild(el('div', null, '<hr style="border:0;border-top:1px solid var(--line-soft);margin:8px 0">'));
+        const rhd = el('div', 'layer-subhead');
+        rhd.appendChild(el('span', null, 'วงรัศมีหน่วยประจำที่'));
+        box.appendChild(rhd);
+        const RING_NAME = { pistol: 'PISTOL', arrow: 'ARROW' };
+        WR.seedRings.keys().forEach(k => {
+          const info = WR.seedRings.info(k);
+          const label = RING_NAME[k] || k;
+          box.appendChild(switchRow(`วงรัศมี ${label}`, info.on, on => { WR.seedRings.setVisible(k, on); }));
+          box.appendChild(sliderRow(`ความทึบวงรัศมี ${label}`, info.opacity, v => WR.seedRings.setOpacity(k, v)));
+        });
+      }
+      if (WR.firearc) {
+        box.appendChild(el('div', null, '<hr style="border:0;border-top:1px solid var(--line-soft);margin:8px 0">'));
+        box.appendChild(switchRow('เส้นแนวยิง (มรกต)', WR.firearc.isVisible(), on => WR.firearc.setVisible(on)));
+      }
+      if (WR.hostileSim) {
+        box.appendChild(el('div', null, '<hr style="border:0;border-top:1px solid var(--line-soft);margin:8px 0">'));
+        const shd = el('div', 'layer-subhead');
+        shd.appendChild(el('span', null, 'จำลองการเคลื่อนที่เครื่องบินข้าศึก'));
+        box.appendChild(shd);
+        const cur = WR.hostileSim.getSpeedMultiplier();
+        const speedRow = el('div', 'btn-row');
+        [1, 10, 20, 30, 40].forEach(m => {
+          const b = el('button', 'btn' + (cur === m ? ' primary' : ''), m + '×');
+          b.onclick = () => { WR.hostileSim.setSpeedMultiplier(m); buildLayers(); };
+          speedRow.appendChild(b);
+        });
+        box.appendChild(field('ความเร็วจำลอง (เทียบเวลาจริง)', speedRow));
+      }
+      box.appendChild(el('div', null, '<hr style="border:0;border-top:1px solid var(--line-soft);margin:8px 0">'));
+      box.appendChild(iconScaleRow());
+      return;
+    }
 
     box.appendChild(switchRow('กริด 200 ม.', true, on => WR.core.showGrid(on)));
     box.appendChild(sliderRow('ความทึบกริด', 0.6, v => WR.core.setGridOpacity(v)));
@@ -6328,19 +7424,7 @@ window.WR_GRAPHICS = [
     }
     box.appendChild(el('div', null, '<hr style="border:0;border-top:1px solid var(--line-soft);margin:8px 0">'));
 
-    // ขนาดสัญลักษณ์ (เทียบกับช่องกริด 1 ช่อง) — 1.0 = พอดี 1 ช่อง
-    const isr = el('div', 'field');
-    isr.appendChild(el('label', null, `ขนาดสัญลักษณ์ (× ช่องกริด) — ${((WR.state.iconScale || 1)).toFixed(2)}`));
-    const ii = el('input'); ii.type = 'range'; ii.min = 0.4; ii.max = 1.6; ii.step = 0.05;
-    ii.value = WR.state.iconScale || 1; ii.style.width = '100%';
-    ii.addEventListener('input', () => {
-      WR.state.iconScale = +ii.value;
-      try { localStorage.setItem('wr_iconscale', ii.value); } catch (e) {}
-      isr.querySelector('label').textContent = `ขนาดสัญลักษณ์ (× ช่องกริด) — ${(+ii.value).toFixed(2)}`;
-      WR.entities.redrawAll();
-    });
-    isr.appendChild(ii);
-    box.appendChild(isr);
+    box.appendChild(iconScaleRow());
 
     const counts = WR.entities.countByCat();
     WR_CATS.forEach(c => {
@@ -6382,6 +7466,21 @@ window.WR_GRAPHICS = [
     const i = el('input'); i.type = 'range'; i.min = 0; i.max = 1; i.step = 0.05; i.value = val; i.style.width = '100%';
     i.addEventListener('input', () => cb(+i.value));
     r.appendChild(i); return r;
+  }
+  // ขนาดสัญลักษณ์ (เทียบกับช่องกริด 1 ช่อง) — 1.0 = พอดี 1 ช่อง — ใช้ร่วมกันทั้งโหมดสปฐบ./สปภอ.
+  function iconScaleRow() {
+    const isr = el('div', 'field');
+    isr.appendChild(el('label', null, `ขนาดสัญลักษณ์ (× ช่องกริด) — ${((WR.state.iconScale || 1)).toFixed(2)}`));
+    const ii = el('input'); ii.type = 'range'; ii.min = 0.4; ii.max = 1.6; ii.step = 0.05;
+    ii.value = WR.state.iconScale || 1; ii.style.width = '100%';
+    ii.addEventListener('input', () => {
+      WR.state.iconScale = +ii.value;
+      try { localStorage.setItem('wr_iconscale', ii.value); } catch (e) {}
+      isr.querySelector('label').textContent = `ขนาดสัญลักษณ์ (× ช่องกริด) — ${(+ii.value).toFixed(2)}`;
+      WR.entities.redrawAll();
+    });
+    isr.appendChild(ii);
+    return isr;
   }
 
   /* ---------- บันทึกเหตุการณ์ + SITREP ---------- */
@@ -6450,6 +7549,11 @@ window.WR_GRAPHICS = [
   /* ---------- สถานะ / นาฬิกา ---------- */
   function syncAll() {
     WR.links && WR.links.recompute();
+    WR.hazard && WR.hazard.recompute();
+    WR.firearc && WR.firearc.recompute();
+    WR.hostileSim && WR.hostileSim.recomputeTracks();
+    renderHostileFire();
+    renderCrashReadout();
     buildLayers();
     buildLayerFilter();
     buildTypeFilter();
@@ -6483,6 +7587,8 @@ window.WR_GRAPHICS = [
     $('#t-open').onclick = () => $('#imp-json').click();
     $('#t-png').onclick = () => WR.io.exportPNG();
     $('#t-replay').onclick = () => WR.io.inReplay() ? WR.io.exitReplay() : WR.io.enterReplay();
+    $('#t-mode-ground').onclick = () => setMapMode('ground');
+    $('#t-mode-air').onclick = () => setMapMode('air');
     $('#t-present').onclick = togglePresent;
     $('#t-help').onclick = () => $('#modal-help').classList.add('on');
     $('#help-close').onclick = () => $('#modal-help').classList.remove('on');
@@ -6564,7 +7670,7 @@ window.WR_GRAPHICS = [
   WR.ui = {
     build, ghost, clearGhost, clearPaletteSel, clearToolSel,
     renderProps: buildProps, refreshProps, renderLog, syncAll,
-    toast, hint, readout,
+    toast, hint, readout, getMapMode: () => mapMode,
     getIncidents: () => incidents, setIncidents: a => { incidents = a || []; renderIncidents(); },
     getSitrep: () => $('#sitrep').value, setSitrep: v => { $('#sitrep').value = v || ''; },
     renderIncidents,
@@ -6588,6 +7694,121 @@ window.WR_GRAPHICS = [
     keepArmed: false,
     basemap: 'gsat',   // ค่าเริ่มต้นทุกครั้งที่เปิด: ภาพถ่ายดาวเทียม Google (*ออนไลน์* — ดู OPSEC ใน README)
     basemapXYZ: '',
+  };
+
+  /* ---------- หน่วยประจำที่ถาวรของ สปภอ. (นนทุกข์ 1-4 ฯลฯ) ----------
+     พิกัดตายตัว — ล็อกห้ามลาก, ป้ายกำกับบนแผนที่แสดงชื่อ "นนทุกข์ N" ตามปกติ
+     (Radial/DME ของทุกไอคอน — รวมหน่วยประจำที่นี้ด้วย — คำนวณสดใน popup โดย entities.js ผ่าน WR.afdz.radialDme())
+     ใส่ id คงที่ไว้ ตรวจ/ปรับให้ตรงกับนิยามนี้เสมอทุกครั้งที่บูต (เพิ่มกลับถ้าถูกลบ, แก้พิกัด/ป้ายกลับถ้าถูกย้าย/แก้ไข) */
+  const AFDZ_SEED_UNITS = [
+    { id: 'seed-nonthuk-1', defId: 'nonthuk', callsign: 'นนทุกข์ 1', lat: 14.961713, lng: 100.710053 },     // ผู้ใช้ระบุพิกัดตรง 2026-09-14
+    { id: 'seed-nonthuk-2', defId: 'nonthuk', callsign: 'นนทุกข์ 2', lat: 14.855273, lng: 100.682266 },     // ผู้ใช้ระบุพิกัดตรง 2026-09-14
+    { id: 'seed-nonthuk-3', defId: 'nonthuk', callsign: 'นนทุกข์ 3', lat: 14.9045167, lng: 100.6213056 },   // จาก 14°54'16.26"N 100°37'16.70"E (ผู้ใช้ระบุ 2026-09-14)
+    { id: 'seed-nonthuk-4', defId: 'nonthuk', callsign: 'นนทุกข์ 4', mgrs: '47PPS766367' },   // ผู้ใช้ปรับกลับเป็น MGRS 2026-09-14 (เคยเป็นพิกัด Google Maps ช่วงสั้น ๆ)
+    { id: 'seed-khangkhao-1', defId: 'khangkhao', callsign: 'ค้างคาว', lat: 14.87385, lng: 100.6484 },      // จาก 14°52.431'N 100°38.904'E (ผู้ใช้ระบุ 2026-09-14)
+    { id: 'seed-pistol-1', defId: 'pistol', callsign: 'PISTOL 1', mgrs: '47PPS734517', ringKm: 5, ringColor: '#7dd3fc' },
+    { id: 'seed-pistol-2', defId: 'pistol', callsign: 'PISTOL 2', mgrs: '47PPS831478', ringKm: 5, ringColor: '#7dd3fc' },
+    { id: 'seed-pistol-3', defId: 'pistol', callsign: 'PISTOL 3', mgrs: '47PPS746405', ringKm: 5, ringColor: '#7dd3fc' },
+    { id: 'seed-arrow-1', defId: 'arrow', callsign: 'ARROW 1', mgrs: '47PPS771487', ringKm: 7, ringColor: '#ec4899' },
+    { id: 'seed-arrow-2', defId: 'arrow', callsign: 'ARROW 2', mgrs: '47PPS809398', ringKm: 7, ringColor: '#ec4899' },
+    { id: 'seed-arrow-3', defId: 'arrow', callsign: 'ARROW 3', mgrs: '47PPS723457', ringKm: 7, ringColor: '#ec4899' },
+    // แนวยิง A/B/ระยะ เป็นแค่ "ค่าเริ่มต้น" ตอนสร้างครั้งแรก — ปรับทีหลังผ่านแผงคุณสมบัติได้ ไม่ถูกบังคับทับตอนบูตซ้ำ
+    { id: 'seed-morakot-1', defId: 'morakot', callsign: 'มรกต 1', mgrs: '47PPS786461', fireA: 44, fireB: 100, fireRangeYd: 2000 },
+    { id: 'seed-morakot-2', defId: 'morakot', callsign: 'มรกต 2', mgrs: '47PPS790451', fireA: 47, fireB: 117, fireRangeYd: 2000 },
+    { id: 'seed-morakot-3', defId: 'morakot', callsign: 'มรกต 3', mgrs: '47PPS794441', fireA: 207, fireB: 75, fireRangeYd: 2000 },
+    { id: 'seed-morakot-4', defId: 'morakot', callsign: 'มรกต 4', mgrs: '47PPS781444', fireA: 250, fireB: 153, fireRangeYd: 2000 },
+  ];
+  // ค่าเริ่มต้นแนวยิงต่อหน่วย (ให้ปุ่ม "Quick Default" ในแผงคุณสมบัติเรียกคืนค่าได้)
+  WR.fireArcDefaults = {};
+  AFDZ_SEED_UNITS.forEach(s => {
+    if (s.fireA != null || s.fireB != null || s.fireRangeYd != null) {
+      WR.fireArcDefaults[s.id] = { fireA: s.fireA ?? null, fireB: s.fireB ?? null, fireRangeYd: s.fireRangeYd ?? 7400 };
+    }
+  });
+  // คืน {lat,lng} จาก seed entry — รองรับทั้งพิกัดตรง (lat/lng) และ MGRS (mgrs)
+  function seedLatLng(s) {
+    if (s.lat != null && s.lng != null) return { lat: s.lat, lng: s.lng };
+    let ll;
+    try { ll = window.mgrs.toPoint(s.mgrs); } catch (e) { return null; }   // [lng, lat]
+    return ll ? { lat: ll[1], lng: ll[0] } : null;
+  }
+  function ensureSeedUnits() {
+    AFDZ_SEED_UNITS.forEach(s => {
+      const p = seedLatLng(s); if (!p) return;
+      const { lat, lng } = p;
+      const ent = WR.entities.get(s.id);
+      if (!ent) {
+        const extra = { id: s.id, callsign: s.callsign, locked: true, silent: true };
+        if (s.fireA != null) extra.fireA = s.fireA;
+        if (s.fireB != null) extra.fireB = s.fireB;
+        if (s.fireRangeYd != null) extra.fireRangeYd = s.fireRangeYd;
+        WR.entities.add(s.defId, { lat, lng }, extra);
+        return;
+      }
+      const same = ent.lat === lat && ent.lng === lng && ent.callsign === s.callsign && ent.locked === true;
+      if (!same) WR.entities.update(s.id, { lat, lng, callsign: s.callsign, locked: true });
+    });
+  }
+
+  // วงรัศมี (กม.) รอบหน่วยประจำที่บางตัว (เช่น PISTOL 1-3) — วงคงที่ตามพิกัด ไม่ผูกกับการลากย้าย (ล็อกอยู่แล้ว)
+  // เห็นได้เฉพาะตอนหน่วยนั้นมองเห็น (ui.js ผูก pane 'seedRings' ไว้ในชุดที่แสดงเฉพาะโหมด สปภอ.)
+  const seedRingsBuilt = new Set();
+  const RING_GROUPS = {};   // defId -> { group: L.layerGroup, on, opacity, color }
+  const RING_LAYERS = {};   // entityId -> { layer: L.circle, radiusKm } — ใช้เช็ค/กระพริบทีละวง
+  const ringLS = (key, suffix) => `wr_ring_${suffix}_${key}`;
+  function ensureSeedRings() {
+    const map = WR.core.map;
+    if (!map.getPane('seedRings')) {
+      map.createPane('seedRings');
+      map.getPane('seedRings').style.zIndex = 498;   // ใต้ไอคอนหน่วย (500)
+      map.getPane('seedRings').style.pointerEvents = 'none';
+    }
+    AFDZ_SEED_UNITS.forEach(s => {
+      if (!s.ringKm || seedRingsBuilt.has(s.id)) return;
+      const p = seedLatLng(s); if (!p) return;
+      seedRingsBuilt.add(s.id);
+      const key = s.defId;
+      if (!RING_GROUPS[key]) {
+        let on = true, opac = 0.08;
+        try {
+          const so = localStorage.getItem(ringLS(key, 'on')); if (so != null) on = so === '1';
+          const sv = parseFloat(localStorage.getItem(ringLS(key, 'op'))); if (!isNaN(sv)) opac = sv;
+        } catch (e) {}
+        const group = L.layerGroup([], { pane: 'seedRings' });
+        if (on) group.addTo(map);
+        RING_GROUPS[key] = { group, on, opacity: opac, color: s.ringColor || '#eab308' };
+      }
+      const rg = RING_GROUPS[key];
+      const circle = L.circle([p.lat, p.lng], {
+        pane: 'seedRings', radius: s.ringKm * 1000, color: rg.color, weight: 2,
+        fill: true, fillColor: rg.color, fillOpacity: rg.opacity, interactive: false,
+      }).addTo(rg.group);
+      RING_LAYERS[s.id] = { layer: circle, radiusKm: s.ringKm };
+    });
+  }
+  // เปิด/ปิด + ปรับความทึบวงรัศมี แยกทีละชนิดไอคอน (เช่น PISTOL, ARROW) — ใช้จากแผงเลเยอร์ (ui.js)
+  // radiusKm/setAlert — ใช้โดย hostilesim.js เช็คว่าเครื่องบินข้าศึกเข้าระยะวงไหน แล้วสั่งให้วงนั้นกระพริบแดง
+  WR.seedRings = {
+    keys: () => Object.keys(RING_GROUPS),
+    info: key => { const rg = RING_GROUPS[key]; return rg ? { on: rg.on, opacity: rg.opacity } : null; },
+    setVisible(key, on) {
+      const rg = RING_GROUPS[key]; if (!rg) return;
+      rg.on = !!on;
+      if (rg.on) rg.group.addTo(WR.core.map); else WR.core.map.removeLayer(rg.group);
+      try { localStorage.setItem(ringLS(key, 'on'), rg.on ? '1' : '0'); } catch (e) {}
+    },
+    setOpacity(key, v) {
+      const rg = RING_GROUPS[key]; if (!rg) return;
+      rg.opacity = Math.max(0, Math.min(1, +v || 0));
+      rg.group.eachLayer(l => l.setStyle({ fillOpacity: rg.opacity }));
+      try { localStorage.setItem(ringLS(key, 'op'), String(rg.opacity)); } catch (e) {}
+    },
+    radiusKm: entId => { const r = RING_LAYERS[entId]; return r ? r.radiusKm : null; },
+    setAlert(entId, on) {
+      const r = RING_LAYERS[entId]; if (!r) return;
+      const el = r.layer.getElement ? r.layer.getElement() : r.layer._path;
+      if (el) el.classList.toggle('ring-alert', !!on);
+    },
   };
 
   /* ---------- หน้าเข้าระบบ (client-side gate — ไม่ใช่การป้องกันระดับจริง ดู README) ---------- */
@@ -6637,10 +7858,17 @@ window.WR_GRAPHICS = [
 
     // เลเยอร์ขอบเขตพื้นที่ (2026 Wing2 Area)
     WR.areas && WR.areas.init();
+    // สปภอ. — วงแหวนป้องกันภัยทางอากาศ (ซ่อนอยู่จนกว่าจะสลับโหมด)
+    WR.afdz && WR.afdz.init();
 
     // 2) โมดูลบนแผนที่
     WR.entities.init();
     WR.links && WR.links.init();     // เส้นเชื่อมความสัมพันธ์ (ผู้ต้องสงสัย ↔ หน่วยตอบโต้ใกล้สุด)
+    WR.hazard && WR.hazard.init();   // วงรัศมีอันตราย 100 ม. (วัตถุต้องสงสัย/วัตถุระเบิด, อากาศยานตก)
+    WR.firearc && WR.firearc.init(); // เส้นแนวยิง A/B ของหน่วยที่ปรับทิศทางได้ (มรกต)
+    WR.hostileSim && WR.hostileSim.init(); // จำลอง+ติดตามเครื่องบินข้าศึกที่ตรวจพบ
+    ensureSeedUnits();                // หน่วยประจำที่ถาวรของ สปภอ. (นนทุกข์, ค้างคาว, PISTOL 1-3)
+    ensureSeedRings();                // วงรัศมี 6 กม. รอบ PISTOL 1-3
     WR.draw.init();
 
     // 3) UI
@@ -6663,11 +7891,14 @@ window.WR_GRAPHICS = [
     const map = WR.core.map;
     map.on('mousemove', e => {
       const c = WR.core.highlightCell(e.latlng);
-      WR.ui.readout(
-        `<div><span class="k">ช่อง </span><span class="cell">${c ? c.full : '— นอกกรอบ —'}</span></div>` +
+      let html = `<div><span class="k">ช่อง </span><span class="cell">${c ? c.full : '— นอกกรอบ —'}</span></div>` +
         `<div><span class="k">พิกัด (DDM) </span>${WR.core.fmtLatLng(e.latlng)}</div>` +
-        `<div><span class="k">MGRS </span>${WR.core.fmtMGRS(e.latlng)}</div>`
-      );
+        `<div><span class="k">MGRS </span>${WR.core.fmtMGRS(e.latlng)}</div>`;
+      // โหมด สปภอ. — เพิ่ม Radial/DME เทียบจุดกึ่งกลางสนามบิน ให้เทียบตำแหน่งง่ายขึ้น
+      if (WR.ui.getMapMode && WR.ui.getMapMode() === 'air') {
+        html += `<div><span class="k">Radial/DME </span>${WR.afdz.radialDme(e.latlng.lat, e.latlng.lng)}</div>`;
+      }
+      WR.ui.readout(html);
     });
     map.on('mouseout', () => WR.core.clearHighlight());
 
@@ -6689,6 +7920,7 @@ window.WR_GRAPHICS = [
         } else {
           WR.io.clearAutosave();
         }
+        ensureSeedUnits();   // กันหายกรณีสถานการณ์ที่กู้คืน/ล้างไม่มีหน่วยประจำที่นี้
       }, 400);
     }
 
