@@ -1135,6 +1135,27 @@ body.dnd-grabbing, body.dnd-grabbing * { cursor: grabbing !important; }
   text-shadow: 0 0 2px #000; pointer-events: none;
 }
 
+/* หมุดตำแหน่งมือถือ (bft.js) — จุดฟ้าเรืองแสง (หรือไอคอนบทบาทที่เลือกไว้) + ป้ายชื่อใต้จุด + คลิกเลือกได้ */
+.bft-marker { position: relative; transform: translate(-50%, -50%); cursor: pointer; }
+.bft-dot {
+  width: 14px; height: 14px; border-radius: 50%; background: #38bdf8;
+  border: 2px solid #0b0f14; box-shadow: 0 0 6px rgba(56, 189, 248, .9);
+  margin: 0 auto;
+}
+.bft-icon {
+  width: 30px; height: 30px; border-radius: 50%; overflow: hidden; margin: 0 auto;
+  border: 2px solid #38bdf8; box-shadow: 0 0 6px rgba(56, 189, 248, .9);
+  background: rgba(11, 15, 20, .7); display: flex; align-items: center; justify-content: center;
+}
+.bft-icon img { width: 100%; height: 100%; object-fit: contain; }
+.bft-marker.sel .bft-dot, .bft-marker.sel .bft-icon { box-shadow: 0 0 0 3px #fff, 0 0 10px rgba(56, 189, 248, 1); }
+.bft-label {
+  position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font-size: 10px; font-weight: 700; color: #e8eef5;
+  background: rgba(11, 15, 20, .82); padding: 1px 5px; border-radius: 3px;
+  text-shadow: 0 0 2px #000; pointer-events: none;
+}
+
 /* จุดกากบาทชั่วคราวตอนค้นหาพิกัดเจอ — กะพริบแล้วหายไปเอง */
 .coord-search-pin {
   width: 22px; height: 22px; position: relative;
@@ -1282,23 +1303,26 @@ kbd {
    แล้ว translate(-50%,-50%) ดึงให้ "จุดกึ่งกลางชิป" ทับจุดกลางเส้นพอดีทั้งแกนตั้ง/นอน */
 .link-lbl {
   position: absolute; left: 0; top: 0;
-  display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 700;
-  white-space: nowrap; line-height: 1.25; padding: 1px 5px; border-radius: 3px;
-  color: #fecaca; background: #0b0f14; border: 1px solid rgba(239, 68, 68, .6);
+  display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 700;
+  white-space: nowrap; line-height: 1.25; padding: 2px 6px; border-radius: 3px;
+  color: #fecaca; background: #0b0f14; border: 1.5px solid rgba(239, 68, 68, .95);
+  box-shadow: 0 0 5px rgba(239, 68, 68, .5);
   text-shadow: 0 0 2px #000, 0 0 3px #000; pointer-events: none;
   transform: translate(-50%, -50%);
 }
-.link-lbl.blue { color: #bfdbfe; border-color: rgba(59, 130, 246, .6); }
-.link-lbl.yellow { color: #fde68a; border-color: rgba(234, 179, 8, .55); }
-.link-lbl.orange { color: #fdba74; border-color: rgba(249, 115, 22, .55); }
-.link-lbl.purple { color: #e9d5ff; border-color: rgba(168, 85, 247, .6); }
-.link-lbl.cyan { color: #a5f3fc; border-color: rgba(6, 182, 212, .6); }
+.link-lbl.blue { color: #bfdbfe; border-color: rgba(59, 130, 246, .95); box-shadow: 0 0 5px rgba(59, 130, 246, .5); }
+.link-lbl.yellow { color: #fde68a; border-color: rgba(234, 179, 8, .9); box-shadow: 0 0 5px rgba(234, 179, 8, .5); }
+.link-lbl.orange { color: #fdba74; border-color: rgba(249, 115, 22, .9); box-shadow: 0 0 5px rgba(249, 115, 22, .5); }
+.link-lbl.purple { color: #e9d5ff; border-color: rgba(168, 85, 247, .95); box-shadow: 0 0 5px rgba(168, 85, 247, .5); }
+.link-lbl.cyan { color: #a5f3fc; border-color: rgba(6, 182, 212, .95); box-shadow: 0 0 5px rgba(6, 182, 212, .5); }
 .link-lbl.bright {
   color: #e0f2fe; border-color: #38bdf8;
   box-shadow: 0 0 7px rgba(56, 189, 248, .75), inset 0 0 6px rgba(56, 189, 248, .3);
 }
 /* เส้นเชื่อมความสำคัญเร่งด่วนสูงสุด (หน่วยถูกทำลาย) — เรืองแสง */
 .link-urgent { filter: drop-shadow(0 0 3px rgba(56, 189, 248, .95)); }
+/* เส้นเชื่อมความสัมพันธ์ระดับปกติ — ขอบเข้มรอบเส้นกันจมพื้นหลังภาพถ่ายดาวเทียมที่รก (เหมือนเทคนิค text-shadow ของป้ายกำกับ) */
+.link-glow { filter: drop-shadow(0 0 1.5px #000) drop-shadow(0 0 1.5px #000); }
 
 /* วงรัศมีอันตราย 100 ม. (hazard.js) — เส้นขอบแดงเรืองแสง โดดเด่น กะพริบเบา ๆ */
 .hazard-ring {
@@ -1414,7 +1438,7 @@ body.locked #app { display: none; }
 }
 
 </style>
-<!-- build: single-file bundle (build/bundle.mjs) — 2026-09-15T13:46:37.229Z -->
+<!-- build: single-file bundle (build/bundle.mjs) — 2026-09-15T16:10:57.919Z -->
 </head>
 <body class="locked">
 
@@ -5671,6 +5695,7 @@ window.WR_GRAPHICS = [
 
   let map, lineGroup, labelGroup, visible = true, ready = false, linkCount = 0;
   let opacity = 1;                       // 0..1 = ตัวคูณความทึบเส้น/ป้าย (ผู้ใช้ปรับได้)
+  let linksByMember = new Map();         // entId -> [{anchorId,anchorDefId,name,lat,lng,distM}] — query ได้ว่าใครเชื่อมกับใคร (ใช้โดย bft.js ส่งทิศ/ระยะกลับมือถือ)
   const labelOp = () => Math.max(0.3, opacity);
 
   function init() {
@@ -5711,13 +5736,13 @@ window.WR_GRAPHICS = [
   const compass = d => COMPASS[Math.round(d / 22.5) % 16];
 
   function drawLink(rule, st, ancLL, memLL, d) {
-    const base = st.urgent ? 1 : st.minor ? 0.75 : 0.9;
+    const base = st.urgent ? 1 : st.minor ? 0.8 : 1;
     const pl = L.polyline([ancLL, memLL], {
       pane: 'links', color: st.color, lineCap: 'round', interactive: false,
-      weight: st.urgent ? 3 : st.minor ? 1.5 : 2,
+      weight: st.urgent ? 3.5 : st.minor ? 2 : 3,
       opacity: base * opacity,
       dashArray: st.solid ? null : st.urgent ? '7 5' : '6 6',
-      className: st.urgent ? 'link-urgent' : '',
+      className: st.urgent ? 'link-urgent' : st.minor ? '' : 'link-glow',
     });
     pl._baseOp = base;
     pl.addTo(lineGroup);
@@ -5752,7 +5777,10 @@ window.WR_GRAPHICS = [
     lineGroup.clearLayers();
     labelGroup.clearLayers();
     linkCount = 0;
-    if (!visible) return;
+    linksByMember = new Map();
+    // หมายเหตุ: ยังคำนวณ linksByMember ต่อแม้ปิดการแสดงผลเส้นอยู่ (visible=false) — ฟีเจอร์ที่พึ่งพาข้อมูลนี้
+    // (เช่น bft.js ส่งทิศ/ระยะกลับมือถือ) ควรทำงานได้โดยไม่ขึ้นกับว่าเปิดวาดเส้นบนแผนที่ไว้หรือไม่
+    const drawing = visible;
 
     // นับเฉพาะไอคอนที่ "มองเห็นอยู่" (ไม่ถูกซ่อนด้วยตัวกรองชนิด/กลุ่ม)
     const shown = e => {
@@ -5803,8 +5831,13 @@ window.WR_GRAPHICS = [
         pairs = pairs.filter(p => keep.has(p));
       }
 
-      // รอบ 3 — วาด
-      pairs.forEach(p => drawLink(rule, styleFor(p.m), p.ancLL, p.mll, p.d));
+      // รอบ 3 — วาด (เฉพาะตอนเปิดแสดงผลเส้นอยู่) + เก็บผลลัพธ์ไว้ query ทีหลังเสมอไม่ว่าจะวาดหรือไม่
+      pairs.forEach(p => {
+        if (drawing) drawLink(rule, styleFor(p.m), p.ancLL, p.mll, p.d);
+        const arr = linksByMember.get(p.m.id) || [];
+        arr.push({ anchorId: p.anc.id, anchorDefId: p.anc.defId, name: p.anc.callsign || p.anc.name, lat: p.anc.lat, lng: p.anc.lng, distM: p.d });
+        linksByMember.set(p.m.id, arr);
+      });
     });
   }
 
@@ -5831,6 +5864,8 @@ window.WR_GRAPHICS = [
     isVisible: () => visible,
     getOpacity: () => opacity,
     count: () => linkCount,
+    // รายการ anchor ที่ entId (เช่นหน่วยตอบโต้ตัวหนึ่ง) กำลังเชื่อมอยู่ตอนนี้ (คำนวณไว้เสมอไม่ว่าจะเปิดวาดเส้นหรือไม่)
+    getLinksFor: entId => linksByMember.get(entId) || [],
   };
 })();
 
@@ -6318,6 +6353,186 @@ window.WR_GRAPHICS = [
     init, createHostile, setSpeedMultiplier, getSpeedMultiplier, recomputeTracks,
     getLockOrder, fireAt, showRangeRing,
   };
+})();
+
+</script>
+<script>
+/* =========================================================================
+   bft.js — Blue Force Tracking: ดึงพิกัดมือถือสดจาก Firebase Realtime Database
+   (REST API ตรง ๆ ไม่โหลด SDK) มาปักหมุดบนแผนที่ — จุดเดี่ยวแยกต่างหาก ไม่ผูกกับไอคอนหน่วยใน catalog
+   แสดงได้ทั้งสองโหมด (สปฐบ./สปภอ.) เพราะกำลังพลภาคพื้นเกี่ยวข้องกับทั้งสองบริบท
+   ⚠️ เปลี่ยนจากเซิร์ฟเวอร์ LAN ของตัวเอง (build/serve.mjs) มาเป็น Firebase คลาวด์แล้ว (2026-09-15)
+   ผู้ใช้ยอมรับความเสี่ยง OPSEC ไว้แล้วเพื่อให้ใช้งานนอกวง LAN ของฐานได้ — ไม่มีเซิร์ฟเวอร์ก็ยังทำงานได้
+
+   คลิกเลือก + ซ่อน/แสดงรายสมาชิก (เพิ่ม 2026-09-15 ต่อเนื่อง):
+     • คลิกหมุดสมาชิก → ล็อกกับระบบเลือก (select) เดียวกับ entities/graphics โชว์รายละเอียดในแผงคุณสมบัติขวา
+     • ซ่อน/แสดงได้ทีละคนจากแผงเลเยอร์ (กันรกตาเวลามีหลายสมาชิกพร้อมกัน) — hiddenOps เป็น in-memory ล้วน ไม่ persist
+   ========================================================================= */
+(function () {
+  const WR = (window.WR = window.WR || {});
+  const POLL_MS = 5000;
+  const LS_ON = 'wr_bft_on';
+  const STALE_MS = 5 * 60 * 1000;   // ไม่อัปเดตเกิน 5 นาที = ถือว่าหลุด ไม่แสดง (Firebase เองไม่ auto-expire ข้อมูลให้)
+  const FIREBASE_DB = 'https://wing2-cds-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+  let map, group, visible = true, pollT = null;
+  let lastList = [], selOpId = null;
+  let roomCode = null;
+  const hiddenOps = new Set();
+  const listeners = { select: [] };
+  const on = (ev, fn) => listeners[ev].push(fn);
+  const emit = (ev, a) => listeners[ev].forEach(f => f(a));
+
+  try { const s = localStorage.getItem(LS_ON); if (s != null) visible = s === '1'; } catch (e) {}
+
+  function init() {
+    map = WR.core.map;
+    if (!map.getPane('bftMarkers')) {
+      map.createPane('bftMarkers');
+      map.getPane('bftMarkers').style.zIndex = 501;   // เหนือไอคอนหน่วยเล็กน้อย (entities z=500)
+      // ไม่ตั้ง pointerEvents:'none' ที่ pane แล้ว (ต่างจากเดิม) — ต้องคลิกหมุดได้
+    }
+    group = L.layerGroup([], { pane: 'bftMarkers' });
+    if (visible) group.addTo(map);
+    poll();
+    pollT = setInterval(poll, POLL_MS);
+    fetchRoomCode();
+  }
+
+  /* ---------- รหัสห้อง (BFT) — เกตกันคนนอกส่งพิกัดเข้ามาโดยไม่รู้รหัส (เพิ่ม 2026-09-15) ---------- */
+  // บังคับผ่าน Firebase security rules จริง (ดู database.rules.json) ไม่ใช่แค่เช็คฝั่ง client
+  async function fetchRoomCode() {
+    try {
+      const r = await fetch(`${FIREBASE_DB}/roomCode.json`, { cache: 'no-store' });
+      if (r.ok) roomCode = await r.json();
+    } catch (e) {}
+  }
+  function getRoomCode() { return roomCode; }
+  async function setRoomCode(code) {
+    const v = (code || '').trim() || null;
+    try {
+      await fetch(`${FIREBASE_DB}/roomCode.json`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(v) });
+      roomCode = v;
+      return true;
+    } catch (e) { return false; }
+  }
+
+  async function poll() {
+    try {
+      const r = await fetch(`${FIREBASE_DB}/positions.json`, { cache: 'no-store' });
+      if (!r.ok) return;
+      const obj = await r.json();
+      const now = Date.now();
+      const list = Object.entries(obj || {})
+        .map(([opId, p]) => ({ opId, ...p }))
+        .filter(p => now - (p.ts || 0) <= STALE_MS);
+      syncShadowEntities(list);
+      render(list);
+      WR.ui && WR.ui.refreshProps && WR.ui.refreshProps();   // แผงคุณสมบัติที่เปิดค้างไว้ (ถ้าเลือกสมาชิก BFT อยู่) อัปเดตตามสด
+      publishLinks(list);   // ส่งทิศ/ระยะไปยังเป้าหมายที่เชื่อมโยงอยู่ (ถ้ามี) กลับไปให้มือถือของสมาชิกอ่าน
+    } catch (e) { /* อินเทอร์เน็ตหลุด/Firebase เข้าไม่ถึงชั่วคราว — เงียบ ๆ ไม่รบกวนฟีเจอร์อื่น ลองใหม่รอบถัดไปเอง */ }
+  }
+
+  /* ---------- สมาชิกที่เลือกบทบาท/ไอคอนแล้ว → กลายเป็นไอคอนหน่วยจริงใน WR.entities (เพิ่ม 2026-09-15 ต่อเนื่อง) ----------
+     ผู้ใช้ยืนยัน "กลายเป็นไอคอนหน่วยจริง" — เข้าระบบ WR.entities 100% ทำให้ได้กฎเส้นเชื่อมความสัมพันธ์/สเกลไอคอน/
+     ตัวกรองโหมด ฯลฯ มาฟรีทั้งหมดโดยไม่ต้องแก้ links.js/hazard.js/hostilesim.js เลยสักบรรทัด — id คงที่ 'bft-<opId>'
+     ล็อกตำแหน่ง (ขยับเองไม่ได้ ตามจริงจาก GPS เท่านั้น), silent (กันปูมท่วมทุก 5 วิ), ไม่มีบทบาท/ถูกซ่อน = ไม่ sync (ใช้จุดเปล่าแทน) */
+  const shadowIds = new Set();
+  function syncShadowEntities(list) {
+    if (!WR.entities) return;
+    const active = new Set();
+    (list || []).forEach(p => {
+      if (hiddenOps.has(p.opId)) return;
+      const def = p.defId && WR.entities.catDef(p.defId);
+      if (!def || typeof p.lat !== 'number' || typeof p.lng !== 'number') return;
+      active.add(p.opId);
+      const id = 'bft-' + p.opId;
+      const ent = WR.entities.get(id);
+      if (!ent) {
+        WR.entities.add(p.defId, { lat: p.lat, lng: p.lng }, { id, callsign: p.name || def.name, locked: true, silent: true, aff: 'friend' });
+      } else {
+        if (ent.lat !== p.lat || ent.lng !== p.lng) WR.entities.moveSilent(id, p.lat, p.lng);
+        if (p.name && ent.callsign !== p.name) WR.entities.update(id, { callsign: p.name });
+      }
+      shadowIds.add(p.opId);
+    });
+    [...shadowIds].forEach(opId => {
+      if (!active.has(opId)) { WR.entities.remove('bft-' + opId); shadowIds.delete(opId); }
+    });
+  }
+
+  /* ---------- ส่งทิศ/ระยะไปเป้าหมายที่เชื่อมโยงอยู่ กลับไปให้แอปมือถือของสมาชิกอ่าน (เพิ่ม 2026-09-15 ต่อเนื่อง) ----------
+     ใช้ผลจาก WR.links (เส้นเชื่อมความสัมพันธ์ที่มีอยู่แล้ว เช่น สายลม→ผู้ต้องสงสัย) — เรียก recompute() เองก่อน
+     เพราะ syncShadowEntities() ขยับตำแหน่งด้วย moveSilent() ซึ่งไม่ยิง 'change' event ให้ syncAll() คำนวณให้อัตโนมัติ
+     เขียนแค่ path ย่อย positions/<opId>/link (ได้รับอนุญาตเสมอใน rules ไม่ต้องมี roomCode ก็เขียนได้ เพราะเดสก์ท็อปเป็นฝั่งคำนวณ) */
+  function publishLinks(list) {
+    if (!WR.links || !WR.links.getLinksFor) return;
+    WR.links.recompute();
+    (list || []).forEach(p => {
+      if (!p.defId || hiddenOps.has(p.opId)) return;
+      const links = WR.links.getLinksFor('bft-' + p.opId);
+      const top = links[0] || null;   // ปกติมีแค่เส้นเดียวต่อคนอยู่แล้ว เอาตัวแรกพอ
+      const payload = top ? { lat: top.lat, lng: top.lng, label: top.name || top.anchorDefId } : null;
+      fetch(`${FIREBASE_DB}/positions/${p.opId}/link.json`, {
+        method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload),
+      }).catch(() => {});
+    });
+  }
+
+  function render(list) {
+    lastList = list || [];
+    if (!group) return;
+    group.clearLayers();
+    lastList.forEach(p => {
+      if (typeof p.lat !== 'number' || typeof p.lng !== 'number') return;
+      if (hiddenOps.has(p.opId)) return;
+      // มีบทบาท/ไอคอนแล้ว → กลายเป็น entity จริง (WR.entities เรนเดอร์เองแล้วผ่าน syncShadowEntities) ไม่ต้องวาดซ้ำที่นี่
+      if (p.defId && WR.entities && WR.entities.catDef && WR.entities.catDef(p.defId)) return;
+      const m = L.marker([p.lat, p.lng], {
+        pane: 'bftMarkers', interactive: true,
+        icon: L.divIcon({
+          className: '', iconSize: [0, 0], iconAnchor: [0, 0],
+          html: `<div class="bft-marker${p.opId === selOpId ? ' sel' : ''}"><div class="bft-dot"></div><div class="bft-label">${esc(p.name || 'ไม่ทราบชื่อ')}</div></div>`,
+        }),
+      });
+      m.on('click', L.DomEvent.stop).on('click', () => select(p.opId));
+      m.addTo(group);
+    });
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  /* ---------- เลือก/ยกเลิกเลือกสมาชิก (ผูกกับระบบเลือกเดียวกับ entities/graphics ใน app.js) ---------- */
+  function select(opId) {
+    selOpId = opId || null;
+    render(lastList);   // รีเฟรชวงไฮไลต์ตัวที่เลือก
+    emit('select', selected());
+  }
+  function selected() {
+    if (!selOpId) return null;
+    const b = lastList.find(p => p.opId === selOpId);
+    return b ? Object.assign({ _bft: true }, b) : null;
+  }
+
+  /* ---------- ซ่อน/แสดงทีละสมาชิก (กันรกตา) ---------- */
+  function setOpHidden(opId, hidden) {
+    if (hidden) hiddenOps.add(opId); else hiddenOps.delete(opId);
+    if (hidden && selOpId === opId) select(null);
+    render(lastList);
+  }
+  function isOpHidden(opId) { return hiddenOps.has(opId); }
+  // รายชื่อสมาชิกที่กำลังส่งพิกัดอยู่ตอนนี้ — ให้แผงเลเยอร์ (ui.js) สร้างสวิตช์ซ่อน/แสดงทีละคน
+  function list() { return lastList.map(p => ({ opId: p.opId, name: p.name || 'ไม่ทราบชื่อ', hidden: hiddenOps.has(p.opId) })); }
+
+  function setVisible(on) {
+    visible = !!on;
+    if (!group) return;
+    if (visible) group.addTo(map); else map.removeLayer(group);
+    try { localStorage.setItem(LS_ON, visible ? '1' : '0'); } catch (e) {}
+  }
+  function isVisible() { return visible; }
+  function count() { return lastList.length; }   // รวมทั้งจุดเปล่า+ที่กลายเป็น entity แล้ว (ต่างจากเดิมที่นับแค่ group)
+
+  WR.bft = { init, setVisible, isVisible, count, select, selected, on, setOpHidden, isOpHidden, list, getRoomCode, setRoomCode };
 })();
 
 </script>
@@ -7212,9 +7427,10 @@ window.WR_GRAPHICS = [
   function clearGhost() { if (ghostM) { WR.core.map.removeLayer(ghostM); ghostM = null; } }
 
   /* ---------- คุณสมบัติ ---------- */
-  let curKind = null; // 'entity' | 'graphic' | null
+  let curKind = null; // 'entity' | 'graphic' | 'bft' | null
   function buildProps(target) {
     const box = $('#props'); box.innerHTML = '';
+    if (target && target._bft) return propsBft(target);
     const isEnt = target && target._ent === undefined && target.defId;
     if (!target) {
       curKind = null;
@@ -7223,6 +7439,36 @@ window.WR_GRAPHICS = [
     }
     if (isEnt) return propsEntity(target);
     if (target.kind) return propsGraphic(target);
+  }
+
+  // เวลาแบบสัมพัทธ์ ("12 วินาทีที่แล้ว") — ใช้กับ "อัปเดตล่าสุด" ของสมาชิก BFT
+  function relTime(ts) {
+    const s = Math.max(0, Math.round((Date.now() - (ts || 0)) / 1000));
+    if (s < 60) return `${s} วินาทีที่แล้ว`;
+    const m = Math.round(s / 60);
+    if (m < 60) return `${m} นาทีที่แล้ว`;
+    return `${Math.round(m / 60)} ชั่วโมงที่แล้ว`;
+  }
+  function propsBft(b) {
+    curKind = 'bft';
+    const box = $('#props'); box.innerHTML = '';
+    const topRow = el('div', 'row2');
+    topRow.appendChild(el('div', 'field', `<label>ชื่อ / สัญญาณเรียกขาน</label><div style="font-weight:600">${escapeHtml(b.name || 'ไม่ทราบชื่อ')}</div>`));
+    topRow.appendChild(el('div', 'field', `<label>อัปเดตล่าสุด</label><div style="font-weight:600">${relTime(b.ts)}</div>`));
+    box.appendChild(topRow);
+    const ll = L.latLng(b.lat, b.lng);
+    const cell = WR.core.cellAt(ll);
+    const row2 = el('div', 'row2');
+    row2.appendChild(el('div', 'field', `<label>ตำแหน่ง</label><div style="font-family:var(--mono);color:var(--grid-label);font-weight:700;font-size:12px">${cell ? cell.full : 'นอกกรอบกริด'}</div>`));
+    row2.appendChild(el('div', 'field', `<label>ความแม่นยำ GPS</label><div style="font-weight:600">${b.acc ? '~' + Math.round(b.acc) + ' ม.' : '—'}</div>`));
+    box.appendChild(row2);
+    box.appendChild(el('div', 'field', `<label>MGRS</label><div style="font-family:var(--mono);font-size:12px">${WR.core.fmtMGRS(ll)}</div>`));
+    box.appendChild(el('div', 'field', `<label>พิกัด (DDM)</label><div style="font-family:var(--mono);font-size:12px">${WR.core.fmtLatLng(ll)}</div>`));
+    const bar = el('div', 'btn-row');
+    const go = el('button', 'btn', 'ไปยังตำแหน่ง'); go.onclick = () => WR.core.map.panTo(ll);
+    const hide = el('button', 'btn danger', 'ซ่อนสมาชิกนี้');
+    hide.onclick = () => { WR.bft.setOpHidden(b.opId, true); };
+    bar.append(go, hide); box.appendChild(bar);
   }
 
   /* ---------- แผงสั่งยิงเครื่องบินข้าศึกบนแผนที่ ---------- */
@@ -7387,8 +7633,13 @@ window.WR_GRAPHICS = [
     box.appendChild(field('หมายเหตุ', ta));
     const bar = el('div', 'btn-row');
     const go = el('button', 'btn', 'ไปยังตำแหน่ง'); go.onclick = () => WR.core.map.panTo([ent.lat, ent.lng]);
-    const del = el('button', 'btn danger', 'ลบสัญลักษณ์'); del.onclick = () => WR.entities.remove(ent.id);
-    bar.append(go, del); box.appendChild(bar);
+    bar.appendChild(go);
+    // ไอคอนที่ sync มาจากสมาชิก BFT (id ขึ้นต้น 'bft-') ตำแหน่งมาจาก GPS จริง ลบแล้วจะ sync กลับมาใหม่เองรอบถัดไปถ้ายังส่งพิกัดอยู่ — ซ่อนปุ่มลบไปเลยกันงง
+    if (!String(ent.id).startsWith('bft-')) {
+      const del = el('button', 'btn danger', 'ลบสัญลักษณ์'); del.onclick = () => WR.entities.remove(ent.id);
+      bar.appendChild(del);
+    }
+    box.appendChild(bar);
   }
 
   function propsGraphic(g) {
@@ -7415,6 +7666,7 @@ window.WR_GRAPHICS = [
     renderHostileFire();
     if (curKind === 'entity') { const e = WR.entities.selected(); if (e) propsEntity(e); }
     else if (curKind === 'graphic') { const g = WR.draw.selected(); if (g) propsGraphic(g); }
+    else if (curKind === 'bft') { const b = WR.bft && WR.bft.selected(); if (b) propsBft(b); else buildProps(null); }
   }
 
   /* ---------- เลเยอร์ ---------- */
@@ -7442,6 +7694,41 @@ window.WR_GRAPHICS = [
     bi.onclick = () => $('#imp-img').click(); bk.onclick = () => $('#imp-kml').click();
     impRow.append(bi, bk); box.appendChild(impRow);
     box.appendChild(el('div', null, '<hr style="border:0;border-top:1px solid var(--line-soft);margin:8px 0">'));
+
+    // ตำแหน่งมือถือ (BFT) — แสดงทั้งสองโหมด (กำลังพลภาคพื้นเกี่ยวข้องกับทั้งการป้องกันที่ตั้ง+ภาพรวมทางอากาศ)
+    if (WR.bft) {
+      box.appendChild(switchRow('ตำแหน่งมือถือ (BFT)', WR.bft.isVisible(),
+        on => { WR.bft.setVisible(on); }, WR.bft.count(), '#38bdf8'));
+
+      // รหัสห้อง — คนที่ไม่รู้รหัสนี้ (ตั้งในแอปมือถือ) จะส่งพิกัดเข้ามาไม่ได้เลย (บังคับจริงฝั่ง Firebase rules)
+      const codeWrap = el('div', 'field');
+      codeWrap.appendChild(el('label', null, 'รหัสห้อง (BFT) — บอกรหัสนี้ให้สมาชิกกรอกในแอปมือถือ'));
+      const codeRow = el('div', null); codeRow.style.cssText = 'display:flex;gap:6px;align-items:stretch';
+      const codeInput = el('input'); codeInput.type = 'text'; codeInput.placeholder = 'เว้นว่าง = ไม่ล็อกรหัส';
+      codeInput.value = WR.bft.getRoomCode() || '';
+      codeInput.style.flex = '1'; codeInput.style.minWidth = '0';
+      const codeSave = el('button', 'btn', 'บันทึก'); codeSave.style.cssText = 'flex:0 0 auto;width:auto;padding:0 12px';
+      codeSave.onclick = async () => { codeSave.textContent = '…'; await WR.bft.setRoomCode(codeInput.value); codeSave.textContent = 'บันทึก'; toast('ตั้งรหัสห้อง BFT แล้ว'); };
+      codeRow.append(codeInput, codeSave); codeWrap.appendChild(codeRow);
+      box.appendChild(codeWrap);
+
+      // รายชื่อสมาชิกที่กำลังส่งพิกัดอยู่ — ซ่อน/แสดงได้ทีละคน (กันรกตา)
+      const bftList = WR.bft.list();
+      if (bftList.length) {
+        const bhd = el('div', 'layer-subhead');
+        bhd.appendChild(el('span', null, 'สมาชิกที่ส่งพิกัดอยู่'));
+        if (bftList.some(m => m.hidden)) {
+          const allBtn = el('button', 'btn', 'แสดงทั้งหมด');
+          allBtn.onclick = () => { bftList.forEach(m => WR.bft.setOpHidden(m.opId, false)); syncAll(); };
+          bhd.appendChild(allBtn);
+        }
+        box.appendChild(bhd);
+        bftList.forEach(m => {
+          box.appendChild(switchRow(m.name, !m.hidden, on => { WR.bft.setOpHidden(m.opId, !on); syncAll(); }));
+        });
+      }
+      box.appendChild(el('div', null, '<hr style="border:0;border-top:1px solid var(--line-soft);margin:8px 0">'));
+    }
 
     if (mapMode === 'air') {
       const hd = el('div', 'layer-subhead');
@@ -7958,6 +8245,7 @@ window.WR_GRAPHICS = [
     WR.hazard && WR.hazard.init();   // วงรัศมีอันตราย 100 ม. (วัตถุต้องสงสัย/วัตถุระเบิด, อากาศยานตก)
     WR.firearc && WR.firearc.init(); // เส้นแนวยิง A/B ของหน่วยที่ปรับทิศทางได้ (มรกต)
     WR.hostileSim && WR.hostileSim.init(); // จำลอง+ติดตามเครื่องบินข้าศึกที่ตรวจพบ
+    WR.bft && WR.bft.init();          // Blue Force Tracking — ดึงพิกัดมือถือสด (ต้องมี node build/serve.mjs รันอยู่)
     ensureSeedUnits();                // หน่วยประจำที่ถาวรของ สปภอ. (นนทุกข์, ค้างคาว, PISTOL 1-3)
     ensureSeedRings();                // วงรัศมี 6 กม. รอบ PISTOL 1-3
     WR.draw.init();
@@ -7967,17 +8255,22 @@ window.WR_GRAPHICS = [
 
     // 4) การเชื่อมเหตุการณ์ระหว่างโมดูล
     WR.entities.on('select', ent => {
-      if (ent) { WR.draw.select(null); WR.ui.renderProps(ent); openSect('sect-props'); }
-      else if (!WR.draw.selected()) WR.ui.renderProps(null);
+      if (ent) { WR.draw.select(null); WR.bft && WR.bft.select(null); WR.ui.renderProps(ent); openSect('sect-props'); }
+      else if (!WR.draw.selected() && !(WR.bft && WR.bft.selected())) WR.ui.renderProps(null);
       WR.hostileSim && WR.hostileSim.showRangeRing(ent);
     });
     WR.entities.on('change', () => WR.ui.syncAll());
 
     WR.draw.on('select', g => {
-      if (g) { WR.entities.select(null); WR.ui.renderProps(g); openSect('sect-props'); }
-      else if (!WR.entities.selected()) WR.ui.renderProps(null);
+      if (g) { WR.entities.select(null); WR.bft && WR.bft.select(null); WR.ui.renderProps(g); openSect('sect-props'); }
+      else if (!WR.entities.selected() && !(WR.bft && WR.bft.selected())) WR.ui.renderProps(null);
     });
     WR.draw.on('change', () => WR.ui.syncAll());
+
+    WR.bft && WR.bft.on('select', b => {
+      if (b) { WR.entities.select(null); WR.draw.select(null); WR.ui.renderProps(b); openSect('sect-props'); }
+      else if (!WR.entities.selected() && !WR.draw.selected()) WR.ui.renderProps(null);
+    });
 
     // 5) อ่านพิกัด/ช่องกริดใต้เมาส์
     const map = WR.core.map;
